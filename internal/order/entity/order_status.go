@@ -1,29 +1,4 @@
-package order
-
-import (
-	"time"
-
-	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/entity"
-	"github.com/ladmakhi81/golang-ecommerce-api/internal/product"
-	"github.com/ladmakhi81/golang-ecommerce-api/internal/user"
-)
-
-type Order struct {
-	Customer        *user.User
-	Status          OrderStatus
-	FinalPrice      float32
-	StatusChangedAt time.Time
-	Items           []*OrderItem
-
-	entity.BaseEntity
-}
-
-type OrderItem struct {
-	ID       uint
-	Product  *product.Product
-	Vendor   *user.User
-	Quantity uint
-}
+package order_entity
 
 type OrderStatus string
 

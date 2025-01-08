@@ -1,4 +1,4 @@
-package category
+package category_entity
 
 import "github.com/ladmakhi81/golang-ecommerce-api/internal/common/entity"
 
