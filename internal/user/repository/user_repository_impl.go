@@ -73,12 +73,8 @@ func (userRepo UserRepository) CompleteProfile(user *userentity.User) error {
 		complete_profile_at = $5
 		WHERE id = $6;
 	`
-
-	statement, prepareErr := userRepo.Storage.DB.Prepare(command)
-	if prepareErr != nil {
-		return prepareErr
-	}
-	_, executeErr := statement.Exec(
+	row := userRepo.Storage.DB.QueryRow(
+		command,
 		user.Address,
 		user.PostalCode,
 		user.NationalID,
@@ -86,10 +82,7 @@ func (userRepo UserRepository) CompleteProfile(user *userentity.User) error {
 		time.Now(),
 		user.ID,
 	)
-	if executeErr != nil {
-		return executeErr
-	}
-	return nil
+	return row.Err()
 }
 func (userRepo UserRepository) FindBasicUserInfoById(id uint) (*userentity.User, error) {
 	command := `
@@ -119,13 +112,11 @@ func (userRepo UserRepository) UpdateVerificationState(adminId uint, vendorId ui
 		verified_date = $2
 		WHERE id = $3
 	`
-	statement, prepareErr := userRepo.Storage.DB.Prepare(command)
-	if prepareErr != nil {
-		return prepareErr
-	}
-	_, executeErr := statement.Exec(adminId, time.Now(), vendorId)
-	if executeErr != nil {
-		return executeErr
-	}
-	return nil
+	row := userRepo.Storage.DB.QueryRow(
+		command,
+		adminId,
+		time.Now(),
+		vendorId,
+	)
+	return row.Err()
 }
