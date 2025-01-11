@@ -61,3 +61,42 @@ func (userRepo UserRepository) FindBasicInfoByEmail(email string) (*userentity.U
 	}
 	return user, nil
 }
+func (userRepo UserRepository) UpdateUser(user *userentity.User) error {
+	command := `
+		UPDATE _users SET
+		address = $1,
+		postal_code = $2,
+		national_id = $3,
+		full_name = $4
+		WHERE id = $5;
+	`
+
+	statement, prepareErr := userRepo.Storage.DB.Prepare(command)
+	if prepareErr != nil {
+		return prepareErr
+	}
+	_, executeErr := statement.Exec(user.Address, user.PostalCode, user.NationalID, user.FullName, user.ID)
+	if executeErr != nil {
+		return executeErr
+	}
+	return nil
+}
+func (userRepo UserRepository) FindBasicUserInfoById(id uint) (*userentity.User, error) {
+	command := `
+		SELECT email, user_role FROM _users WHERE id = $1
+	`
+	row := userRepo.Storage.DB.QueryRow(command, id)
+	user := new(userentity.User)
+	scanErr := row.Scan(
+		&user.Email,
+		&user.Role,
+	)
+	if scanErr != nil {
+		if scanErr == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, scanErr
+	}
+	user.ID = id
+	return user, nil
+}

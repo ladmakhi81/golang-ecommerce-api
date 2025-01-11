@@ -6,4 +6,6 @@ type IUserRepository interface {
 	CreateUser(user *userentity.User) error
 	IsEmailExist(email string) (bool, error)
 	FindBasicInfoByEmail(email string) (*userentity.User, error)
+	UpdateUser(user *userentity.User) error
+	FindBasicUserInfoById(id uint) (*userentity.User, error)
 }

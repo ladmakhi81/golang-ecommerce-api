@@ -9,7 +9,6 @@ import (
 
 type UserRouter struct {
 	apiRouter   *echo.Group
-	userService userservice.IUserService
 	userHandler UserHandler
 	config      config.MainConfig
 }
@@ -22,8 +21,7 @@ func NewUserRouter(
 	return UserRouter{
 		config:      config,
 		apiRouter:   apiRouter,
-		userService: userService,
-		userHandler: NewUserHandler(),
+		userHandler: NewUserHandler(userService),
 	}
 }
 

@@ -2,20 +2,26 @@ package userservice
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
+	userdto "github.com/ladmakhi81/golang-ecommerce-api/internal/user/dto"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 	userrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/user/repository"
+	pkgemaildto "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/dto"
+	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
-	userRepo userrepository.IUserRepository
+	userRepo     userrepository.IUserRepository
+	emailService pkgemail.IEmailService
 }
 
-func NewUserService(userRepo userrepository.IUserRepository) UserService {
+func NewUserService(userRepo userrepository.IUserRepository, emailService pkgemail.IEmailService) UserService {
 	return UserService{
 		userRepo,
+		emailService,
 	}
 }
 
@@ -87,14 +93,56 @@ func (userService UserService) FindUserByEmail(email string) (*userentity.User, 
 	}
 	return user, nil
 }
-
+func (userService UserService) FindBasicUserInfoById(id uint) (*userentity.User, error) {
+	user, findUserErr := userService.userRepo.FindBasicUserInfoById(id)
+	if findUserErr != nil {
+		return nil, types.NewServerError(
+			"error in finding user by email",
+			"UserService.FindBasicUserInfoById",
+			findUserErr,
+		)
+	}
+	if user == nil {
+		return nil, types.NewClientError(
+			"user not found with this id",
+			http.StatusNotFound,
+		)
+	}
+	return user, nil
+}
+func (userService UserService) CompleteProfile(userId uint, data *userdto.CompleteProfileReqBody) (*userentity.User, error) {
+	user, findUserErr := userService.FindBasicUserInfoById(userId)
+	if findUserErr != nil {
+		return nil, findUserErr
+	}
+	user.Address = data.Address
+	user.NationalID = data.NationalID
+	user.PostalCode = data.PostalCode
+	user.FullName = data.FullName
+	user.IsCompleteProfile = true
+	user.CompleteProfileAt = time.Now()
+	if updateErr := userService.userRepo.UpdateUser(user); updateErr != nil {
+		return nil, types.NewServerError(
+			"error in update user",
+			"UserService.CompleteProfile.UpdateUser",
+			updateErr,
+		)
+	}
+	userService.emailService.SendEmail(
+		pkgemaildto.NewSendEmailDto(
+			user.Email,
+			"You Complete Your Profile Information",
+			"As Soon as possible our supporters validate your information and verify your account",
+		),
+	)
+	return user, nil
+}
 func (userService UserService) isValidPassword(hashedPassword, password string) bool {
 	if passwordErr := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)); passwordErr != nil {
 		return false
 	}
 	return true
 }
-
 func (userService UserService) hashUserPassword(password string) (string, error) {
 	hashedPassword, hashedPasswordErr := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if hashedPasswordErr != nil {

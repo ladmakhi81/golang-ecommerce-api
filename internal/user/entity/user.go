@@ -1,20 +1,26 @@
 package userentity
 
-import "github.com/ladmakhi81/golang-ecommerce-api/internal/common/entity"
+import (
+	"time"
+
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/entity"
+)
 
 type User struct {
-	Role UserRole
+	Role UserRole `json:"role"`
 
-	Email    string
-	Password string
+	Email    string `json:"email"`
+	Password string `json:"-"`
 
 	// vendor
-	FullName   string
-	NationalID string
-	PostalCode string
-	Address    string
-	IsVerified bool
-	VerifiedBy *User
+	FullName          string    `json:"fullName"`
+	NationalID        string    `json:"nationalId"`
+	PostalCode        string    `json:"postalCode"`
+	Address           string    `json:"address"`
+	IsCompleteProfile bool      `json:"isCompleteProfile"`
+	CompleteProfileAt time.Time `json:"completeProfileAt"`
+	IsVerified        bool      `json:"isVerified"`
+	VerifiedBy        *User     `json:"verifiedBy"`
 
 	entity.BaseEntity
 }

@@ -20,5 +20,10 @@ func AuthMiddleware(secretKey string) echo.MiddlewareFunc {
 		ErrorHandler: func(c echo.Context, err error) error {
 			return types.NewClientError("Unauthorized", http.StatusUnauthorized)
 		},
+		SuccessHandler: func(c echo.Context) {
+			user := c.Get("Auth").(*jwt.Token)
+			claims := user.Claims.(*types.AuthClaim)
+			c.Set("AuthClaim", claims)
+		},
 	})
 }

@@ -49,7 +49,7 @@ func main() {
 	// services
 	emailService := pkgemail.NewEmailService(mainConfig)
 	jwtService := authservice.NewJwtService(mainConfig)
-	userService := userservice.NewUserService(userRepo)
+	userService := userservice.NewUserService(userRepo, emailService)
 	authService := authservice.NewAuthService(userService, jwtService, emailService)
 
 	authRouter := auth.NewAuthRouter(apiRoute, authService)
