@@ -22,6 +22,12 @@ type MainConfig struct {
 	DatabasePort     uint   `koanf:"db_port" validate:"gte=1"`
 	DatabasePassword string `koanf:"db_password" validate:"required"`
 	DatabaseUsername string `koanf:"db_username" validate:"required"`
+
+	// mail
+	MailPort     uint   `koanf:"mail_port" validate:"gte=1"`
+	MailHost     string `koanf:"mail_host" validate:"required"`
+	MailUser     string `koanf:"mail_user" validate:"required"`
+	MailPassword string `koanf:"mail_password" validate:"required"`
 }
 
 func NewMainConfig() MainConfig {

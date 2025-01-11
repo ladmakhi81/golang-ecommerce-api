@@ -7,20 +7,25 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
+	pkgemaildto "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/dto"
+	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
 )
 
 type AuthService struct {
-	userService userservice.IUserService
-	jwtService  IJwtService
+	userService  userservice.IUserService
+	jwtService   IJwtService
+	emailService pkgemail.IEmailService
 }
 
 func NewAuthService(
 	userService userservice.IUserService,
 	jwtService IJwtService,
+	emailService pkgemail.IEmailService,
 ) AuthService {
 	return AuthService{
 		userService,
 		jwtService,
+		emailService,
 	}
 }
 
@@ -40,6 +45,13 @@ func (authService AuthService) Signup(reqBody authdto.SignupReqBody) (*authdto.S
 			generatedAccessTokenErr,
 		)
 	}
+	authService.emailService.SendEmail(
+		pkgemaildto.NewSendEmailDto(
+			createdUser.Email,
+			"Your Account Created Successfully",
+			"Welcome To GoEcommerce Application",
+		),
+	)
 	return authdto.NewSignupResponse(generatedAccessToken), nil
 }
 

@@ -13,6 +13,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/validation"
 	userrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/user/repository"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
+	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
 )
 
 func main() {
@@ -45,9 +46,10 @@ func main() {
 	userRepo := userrepository.NewUserRepository(storage)
 
 	// services
+	emailService := pkgemail.NewEmailService(mainConfig)
 	jwtService := authservice.NewJwtService(mainConfig)
 	userService := userservice.NewUserService(userRepo)
-	authService := authservice.NewAuthService(userService, jwtService)
+	authService := authservice.NewAuthService(userService, jwtService, emailService)
 
 	authRouter := auth.NewAuthRouter(apiRoute, authService)
 	authRouter.SetupRouter()
