@@ -2,6 +2,7 @@ package userrepository
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/storage"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
@@ -61,21 +62,30 @@ func (userRepo UserRepository) FindBasicInfoByEmail(email string) (*userentity.U
 	}
 	return user, nil
 }
-func (userRepo UserRepository) UpdateUser(user *userentity.User) error {
+func (userRepo UserRepository) CompleteProfile(user *userentity.User) error {
 	command := `
 		UPDATE _users SET
+		is_complete_profile = TRUE,
 		address = $1,
 		postal_code = $2,
 		national_id = $3,
-		full_name = $4
-		WHERE id = $5;
+		full_name = $4,
+		complete_profile_at = $5
+		WHERE id = $6;
 	`
 
 	statement, prepareErr := userRepo.Storage.DB.Prepare(command)
 	if prepareErr != nil {
 		return prepareErr
 	}
-	_, executeErr := statement.Exec(user.Address, user.PostalCode, user.NationalID, user.FullName, user.ID)
+	_, executeErr := statement.Exec(
+		user.Address,
+		user.PostalCode,
+		user.NationalID,
+		user.FullName,
+		time.Now(),
+		user.ID,
+	)
 	if executeErr != nil {
 		return executeErr
 	}
@@ -83,13 +93,14 @@ func (userRepo UserRepository) UpdateUser(user *userentity.User) error {
 }
 func (userRepo UserRepository) FindBasicUserInfoById(id uint) (*userentity.User, error) {
 	command := `
-		SELECT email, user_role FROM _users WHERE id = $1
+		SELECT email, user_role, is_complete_profile FROM _users WHERE id = $1
 	`
 	row := userRepo.Storage.DB.QueryRow(command, id)
 	user := new(userentity.User)
 	scanErr := row.Scan(
 		&user.Email,
 		&user.Role,
+		&user.IsCompleteProfile,
 	)
 	if scanErr != nil {
 		if scanErr == sql.ErrNoRows {
@@ -99,4 +110,22 @@ func (userRepo UserRepository) FindBasicUserInfoById(id uint) (*userentity.User,
 	}
 	user.ID = id
 	return user, nil
+}
+func (userRepo UserRepository) UpdateVerificationState(adminId uint, vendorId uint) error {
+	command := `
+		UPDATE _users SET
+		is_verified = TRUE,
+		verified_by_id = $1,
+		verified_date = $2
+		WHERE id = $3
+	`
+	statement, prepareErr := userRepo.Storage.DB.Prepare(command)
+	if prepareErr != nil {
+		return prepareErr
+	}
+	_, executeErr := statement.Exec(adminId, time.Now(), vendorId)
+	if executeErr != nil {
+		return executeErr
+	}
+	return nil
 }

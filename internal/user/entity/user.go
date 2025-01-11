@@ -21,6 +21,7 @@ type User struct {
 	CompleteProfileAt time.Time `json:"completeProfileAt"`
 	IsVerified        bool      `json:"isVerified"`
 	VerifiedBy        *User     `json:"verifiedBy"`
+	VerifiedDate      time.Time `json:"verified_date"`
 
 	entity.BaseEntity
 }

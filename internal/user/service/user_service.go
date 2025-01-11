@@ -12,4 +12,5 @@ type IUserService interface {
 	FindUserByEmail(email string) (*userentity.User, error)
 	CompleteProfile(userId uint, data *userdto.CompleteProfileReqBody) (*userentity.User, error)
 	FindBasicUserInfoById(id uint) (*userentity.User, error)
+	VerifyAccountByAdmin(adminId uint, vendorId uint) error
 }

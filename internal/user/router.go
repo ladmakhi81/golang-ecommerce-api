@@ -29,7 +29,7 @@ func (userRouter UserRouter) SetupRouter() {
 	usersRouter := userRouter.apiRouter.Group("/users")
 
 	usersRouter.PATCH(
-		"/verify-account/{id}",
+		"/verify-account/:id",
 		userRouter.userHandler.VerifyAccountByAdmin,
 		middlewares.AuthMiddleware(
 			userRouter.config.SecretKey,

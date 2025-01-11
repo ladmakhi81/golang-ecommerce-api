@@ -1,0 +1,4 @@
+ALTER TABLE
+    _users
+ADD
+    COLUMN verified_date TIMESTAMP DEFAULT NULL

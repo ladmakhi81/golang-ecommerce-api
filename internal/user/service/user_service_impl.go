@@ -1,6 +1,7 @@
 package userservice
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -39,7 +40,6 @@ func (userService UserService) CheckDuplicatedUserEmail(email string) error {
 	}
 	return nil
 }
-
 func (userService UserService) CreateBasicUser(email, password string, role userentity.UserRole) (*userentity.User, error) {
 	userDuplicatedErr := userService.CheckDuplicatedUserEmail(email)
 	if userDuplicatedErr != nil {
@@ -121,7 +121,7 @@ func (userService UserService) CompleteProfile(userId uint, data *userdto.Comple
 	user.FullName = data.FullName
 	user.IsCompleteProfile = true
 	user.CompleteProfileAt = time.Now()
-	if updateErr := userService.userRepo.UpdateUser(user); updateErr != nil {
+	if updateErr := userService.userRepo.CompleteProfile(user); updateErr != nil {
 		return nil, types.NewServerError(
 			"error in update user",
 			"UserService.CompleteProfile.UpdateUser",
@@ -136,6 +136,51 @@ func (userService UserService) CompleteProfile(userId uint, data *userdto.Comple
 		),
 	)
 	return user, nil
+}
+func (userService UserService) VerifyAccountByAdmin(adminId uint, vendorId uint) error {
+	admin, findAdminErr := userService.FindBasicUserInfoById(adminId)
+	if findAdminErr != nil {
+		return findAdminErr
+	}
+	vendor, findVendorErr := userService.FindBasicUserInfoById(vendorId)
+	if findVendorErr != nil {
+		return findVendorErr
+	}
+	if !vendor.IsCompleteProfile {
+		return types.NewClientError(
+			"vendor account first must complete profile account",
+			http.StatusBadRequest,
+		)
+	}
+
+	verificationErr := userService.userRepo.UpdateVerificationState(admin.ID, vendor.ID)
+
+	if verificationErr != nil {
+		return types.NewServerError(
+			"error in verifying user",
+			"UserService.VerifyAccountByAdmin",
+			verificationErr,
+		)
+	}
+
+	userService.emailService.SendEmail(
+		pkgemaildto.NewSendEmailDto(
+			admin.Email,
+			"you verified vendor account, are you sure?",
+			fmt.Sprintf("you verify %s at %v, please double check to avoid fault",
+				vendor.FullName,
+				time.Now().Format("2006-01-02 15:04:05"),
+			),
+		),
+	)
+	userService.emailService.SendEmail(
+		pkgemaildto.NewSendEmailDto(
+			vendor.Email,
+			"hey dear!!!",
+			"Your account verified successfully",
+		),
+	)
+	return nil
 }
 func (userService UserService) isValidPassword(hashedPassword, password string) bool {
 	if passwordErr := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)); passwordErr != nil {

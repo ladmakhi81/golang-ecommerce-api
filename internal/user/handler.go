@@ -2,6 +2,7 @@ package user
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
@@ -20,7 +21,17 @@ func NewUserHandler(userService userservice.IUserService) UserHandler {
 }
 
 func (userHandler UserHandler) VerifyAccountByAdmin(c echo.Context) error {
-	c.JSON(200, map[string]string{"message": "verify account by admin"})
+	adminId := c.Get("AuthClaim").(*types.AuthClaim).ID
+	vendorIdParam := c.Param("id")
+	vendorId, parsedErr := strconv.Atoi(vendorIdParam)
+	if parsedErr != nil {
+		return types.NewClientError("the provided id has wrong format", http.StatusBadRequest)
+	}
+	err := userHandler.userService.VerifyAccountByAdmin(adminId, uint(vendorId))
+	if err != nil {
+		return err
+	}
+	c.JSON(http.StatusOK, map[string]string{"message": "verify successfully ..."})
 	return nil
 }
 
