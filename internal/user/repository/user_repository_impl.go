@@ -9,11 +9,11 @@ import (
 )
 
 type UserRepository struct {
-	Storage *storage.Storage
+	storage *storage.Storage
 }
 
 func NewUserRepository(storage *storage.Storage) UserRepository {
-	return UserRepository{Storage: storage}
+	return UserRepository{storage: storage}
 }
 
 func (userRepo UserRepository) CreateUser(user *userentity.User) error {
@@ -21,7 +21,7 @@ func (userRepo UserRepository) CreateUser(user *userentity.User) error {
 		INSERT INTO _users (email, password, user_role) VALUES ($1, $2, $3)
 		RETURNING id;
 	`
-	row := userRepo.Storage.DB.QueryRow(command, user.Email, user.Password, user.Role)
+	row := userRepo.storage.DB.QueryRow(command, user.Email, user.Password, user.Role)
 	if scanErr := row.Scan(&user.ID); scanErr != nil {
 		return scanErr
 	}
@@ -31,7 +31,7 @@ func (userRepo UserRepository) IsEmailExist(email string) (bool, error) {
 	command := `
 		SELECT id FROM _users WHERE email = $1
 	`
-	row := userRepo.Storage.DB.QueryRow(command, email)
+	row := userRepo.storage.DB.QueryRow(command, email)
 	var id uint
 	err := row.Scan(&id)
 	if err != nil {
@@ -48,7 +48,7 @@ func (userRepo UserRepository) FindBasicInfoByEmail(email string) (*userentity.U
 	`
 	user := new(userentity.User)
 	user.Email = email
-	row := userRepo.Storage.DB.QueryRow(command, email)
+	row := userRepo.storage.DB.QueryRow(command, email)
 	scanErr := row.Scan(
 		&user.ID,
 		&user.Password,
@@ -73,7 +73,7 @@ func (userRepo UserRepository) CompleteProfile(user *userentity.User) error {
 		complete_profile_at = $5
 		WHERE id = $6;
 	`
-	row := userRepo.Storage.DB.QueryRow(
+	row := userRepo.storage.DB.QueryRow(
 		command,
 		user.Address,
 		user.PostalCode,
@@ -88,7 +88,7 @@ func (userRepo UserRepository) FindBasicUserInfoById(id uint) (*userentity.User,
 	command := `
 		SELECT email, user_role, is_complete_profile FROM _users WHERE id = $1
 	`
-	row := userRepo.Storage.DB.QueryRow(command, id)
+	row := userRepo.storage.DB.QueryRow(command, id)
 	user := new(userentity.User)
 	scanErr := row.Scan(
 		&user.Email,
@@ -112,7 +112,7 @@ func (userRepo UserRepository) UpdateVerificationState(adminId uint, vendorId ui
 		verified_date = $2
 		WHERE id = $3
 	`
-	row := userRepo.Storage.DB.QueryRow(
+	row := userRepo.storage.DB.QueryRow(
 		command,
 		adminId,
 		time.Now(),

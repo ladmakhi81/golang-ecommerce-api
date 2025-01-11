@@ -7,6 +7,9 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/auth"
 	authservice "github.com/ladmakhi81/golang-ecommerce-api/internal/auth/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/category"
+	categoryrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/category/repository"
+	categoryservice "github.com/ladmakhi81/golang-ecommerce-api/internal/category/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	errorhandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/error_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/storage"
@@ -45,18 +48,23 @@ func main() {
 
 	// repositories
 	userRepo := userrepository.NewUserRepository(storage)
+	categoryRepo := categoryrepository.NewCategoryRepository(storage)
 
 	// services
 	emailService := pkgemail.NewEmailService(mainConfig)
 	jwtService := authservice.NewJwtService(mainConfig)
 	userService := userservice.NewUserService(userRepo, emailService)
 	authService := authservice.NewAuthService(userService, jwtService, emailService)
+	categoryService := categoryservice.NewCategoryService(categoryRepo)
 
 	authRouter := auth.NewAuthRouter(apiRoute, authService)
 	authRouter.SetupRouter()
 
 	usersRouter := user.NewUserRouter(apiRoute, userService, mainConfig)
 	usersRouter.SetupRouter()
+
+	categoryRouter := category.NewCategoryRouter(apiRoute, mainConfig, categoryService)
+	categoryRouter.SetupRouter()
 
 	log.Println("the server is running")
 
