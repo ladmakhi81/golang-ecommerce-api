@@ -18,7 +18,7 @@ func NewAuthClaim(id uint, role userentity.UserRole) AuthClaim {
 		ID:   id,
 		Role: role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
 		},
 	}
 }

@@ -41,4 +41,6 @@ func GlobalErrorHandling(err error, c echo.Context) {
 
 		fmt.Println(serverErrs)
 	}
+
+	fmt.Printf("%v", err)
 }

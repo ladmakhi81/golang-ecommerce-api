@@ -11,6 +11,7 @@ import (
 	errorhandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/error_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/storage"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/validation"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/user"
 	userrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/user/repository"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
 	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
@@ -53,6 +54,9 @@ func main() {
 
 	authRouter := auth.NewAuthRouter(apiRoute, authService)
 	authRouter.SetupRouter()
+
+	usersRouter := user.NewUserRouter(apiRoute, userService, mainConfig)
+	usersRouter.SetupRouter()
 
 	log.Println("the server is running")
 
