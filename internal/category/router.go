@@ -35,4 +35,27 @@ func (categoryRouter CategoryRouter) SetupRouter() {
 			categoryRouter.config.SecretKey,
 		),
 	)
+
+	categoriesApiRouter.GET(
+		"",
+		categoryRouter.categoryHandler.GetCategoriesTree,
+		middlewares.AuthMiddleware(
+			categoryRouter.config.SecretKey,
+		),
+	)
+
+	categoriesApiRouter.GET(
+		"/page",
+		categoryRouter.categoryHandler.GetCategoriesPage,
+		middlewares.AuthMiddleware(
+			categoryRouter.config.SecretKey,
+		),
+	)
+	categoriesApiRouter.DELETE(
+		"/:id",
+		categoryRouter.categoryHandler.DeleteCategoryById,
+		middlewares.AuthMiddleware(
+			categoryRouter.config.SecretKey,
+		),
+	)
 }

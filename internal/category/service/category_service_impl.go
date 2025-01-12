@@ -69,3 +69,38 @@ func (categoryService CategoryService) FindCategoryById(id uint) (*categoryentit
 	}
 	return category, nil
 }
+func (categoryService CategoryService) FindCategoriesTree() ([]*categoryentity.Category, error) {
+	categories, categoriesErr := categoryService.categoryRepo.FindCategoriesTree()
+	if categoriesErr != nil {
+		return nil, types.NewServerError(
+			"error in retuning categories as tree data",
+			"CategoryService.FindCategoriesPage",
+			categoriesErr,
+		)
+	}
+	return categories, nil
+}
+func (categoryService CategoryService) FindCategoriesPage(page, limit uint) ([]*categoryentity.Category, error) {
+	categories, categoriesErr := categoryService.categoryRepo.FindCategoriesPage(page, limit)
+	if categoriesErr != nil {
+		return nil, types.NewServerError(
+			"error in finding categories page",
+			"CategoryService.FindCategoriesPage",
+			categoriesErr,
+		)
+	}
+	return categories, nil
+}
+func (categoryService CategoryService) DeleteCategoryById(id uint) error {
+	if _, err := categoryService.FindCategoryById(id); err != nil {
+		return err
+	}
+	if deleteErr := categoryService.categoryRepo.DeleteCategoryById(id); deleteErr != nil {
+		return types.NewServerError(
+			"error in deleting category",
+			"CategoryService.DeleteCategoryById",
+			deleteErr,
+		)
+	}
+	return nil
+}

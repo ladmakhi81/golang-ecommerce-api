@@ -6,4 +6,7 @@ type ICategoryRepository interface {
 	IsCategoryNameExist(name string) (bool, error)
 	FindCategoryById(id uint) (*categoryentity.Category, error)
 	CreateCategory(category *categoryentity.Category) error
+	FindCategoriesTree() ([]*categoryentity.Category, error)
+	FindCategoriesPage(page, limit uint) ([]*categoryentity.Category, error)
+	DeleteCategoryById(id uint) error
 }
