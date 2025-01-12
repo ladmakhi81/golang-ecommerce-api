@@ -9,21 +9,23 @@ import (
 )
 
 type ProductRouter struct {
-	apiRouter      *echo.Group
-	productHandler ProductHandler
-	productService productservice.IProductService
-	util           utils.Util
-	config         config.MainConfig
+	apiRouter           *echo.Group
+	productHandler      ProductHandler
+	productService      productservice.IProductService
+	productPriceService productservice.IProductPriceService
+	util                utils.Util
+	config              config.MainConfig
 }
 
 func NewProductRouter(
 	apiRouter *echo.Group,
 	config config.MainConfig,
 	productService productservice.IProductService,
+	productPriceService productservice.IProductPriceService,
 ) ProductRouter {
 	return ProductRouter{
 		apiRouter:      apiRouter,
-		productHandler: NewProductHandler(productService),
+		productHandler: NewProductHandler(productService, productPriceService),
 		util:           utils.NewUtil(),
 		config:         config,
 	}
@@ -67,6 +69,22 @@ func (productRouter ProductRouter) SetupRouter() {
 	productsApi.DELETE(
 		"/:id",
 		productRouter.productHandler.DeleteProductById,
+		middlewares.AuthMiddleware(
+			productRouter.config.SecretKey,
+		),
+	)
+
+	productsApi.POST(
+		"/price/:product_id",
+		productRouter.productHandler.AddPriceToProductPriceList,
+		middlewares.AuthMiddleware(
+			productRouter.config.SecretKey,
+		),
+	)
+
+	productsApi.DELETE(
+		"/price/:id",
+		productRouter.productHandler.DeletePriceItem,
 		middlewares.AuthMiddleware(
 			productRouter.config.SecretKey,
 		),

@@ -53,6 +53,7 @@ func main() {
 	userRepo := userrepository.NewUserRepository(storage)
 	categoryRepo := categoryrepository.NewCategoryRepository(storage)
 	productRepo := productrepository.NewProductRepository(storage)
+	productPriceRepo := productrepository.NewProductPriceRepository(storage)
 
 	// services
 	emailService := pkgemail.NewEmailService(mainConfig)
@@ -61,6 +62,7 @@ func main() {
 	authService := authservice.NewAuthService(userService, jwtService, emailService)
 	categoryService := categoryservice.NewCategoryService(categoryRepo)
 	productService := productservice.NewProductService(userService, categoryService, productRepo, emailService)
+	productPriceService := productservice.NewProductPriceService(productService, productPriceRepo)
 
 	authRouter := auth.NewAuthRouter(apiRoute, authService)
 	authRouter.SetupRouter()
@@ -71,7 +73,7 @@ func main() {
 	categoryRouter := category.NewCategoryRouter(apiRoute, mainConfig, categoryService)
 	categoryRouter.SetupRouter()
 
-	productRouter := product.NewProductRouter(apiRoute, mainConfig, productService)
+	productRouter := product.NewProductRouter(apiRoute, mainConfig, productService, productPriceService)
 	productRouter.SetupRouter()
 
 	log.Println("the server is running")

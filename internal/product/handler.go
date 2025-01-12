@@ -11,16 +11,19 @@ import (
 )
 
 type ProductHandler struct {
-	productService productservice.IProductService
-	util           utils.Util
+	productService      productservice.IProductService
+	productPriceService productservice.IProductPriceService
+	util                utils.Util
 }
 
 func NewProductHandler(
 	productService productservice.IProductService,
+	productPriceService productservice.IProductPriceService,
 ) ProductHandler {
 	return ProductHandler{
-		productService: productService,
-		util:           utils.NewUtil(),
+		productService:      productService,
+		productPriceService: productPriceService,
+		util:                utils.NewUtil(),
 	}
 }
 
@@ -46,7 +49,6 @@ func (productHandler ProductHandler) CreateProduct(c echo.Context) error {
 	})
 	return nil
 }
-
 func (productHandler ProductHandler) ConfirmProductByAdmin(c echo.Context) error {
 	adminId := c.Get("AuthClaim").(*types.AuthClaim).ID
 	productId, parseProductIdErr := productHandler.util.NumericParamConvertor(c.Param("id"), "invalid product id")
@@ -99,5 +101,41 @@ func (productHandler ProductHandler) DeleteProductById(c echo.Context) error {
 		"success": true,
 		"message": "delete successfully ...",
 	})
+	return nil
+}
+func (productHandler ProductHandler) AddPriceToProductPriceList(c echo.Context) error {
+	var reqBody productdto.AddPriceToProductsPriceListReqBody
+	if err := c.Bind(&reqBody); err != nil {
+		return types.NewClientError("invalid request body", http.StatusBadRequest)
+	}
+	if err := c.Validate(reqBody); err != nil {
+		return err
+	}
+	vendorId := c.Get("AuthClaim").(*types.AuthClaim).ID
+	productId, parsedProductIdErr := productHandler.util.NumericParamConvertor(c.Param("product_id"), "invalid product id")
+	if parsedProductIdErr != nil {
+		return parsedProductIdErr
+	}
+	priceItem, priceItemErr := productHandler.productPriceService.AddPriceToProductsPriceList(reqBody, productId, vendorId)
+	if priceItemErr != nil {
+		return priceItemErr
+	}
+	c.JSON(http.StatusCreated, map[string]any{
+		"success": true,
+		"data":    priceItem,
+	})
+	return nil
+}
+func (productHandler ProductHandler) DeletePriceItem(c echo.Context) error {
+	itemId, parsedItemIdErr := productHandler.util.NumericParamConvertor(
+		c.Param("id"),
+		"invalid price item id",
+	)
+	if parsedItemIdErr != nil {
+		return parsedItemIdErr
+	}
+	if removeErr := productHandler.productPriceService.RemovePriceItemFromProductList(itemId); removeErr != nil {
+		return removeErr
+	}
 	return nil
 }
