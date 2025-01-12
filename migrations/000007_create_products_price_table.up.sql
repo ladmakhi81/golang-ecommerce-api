@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS _product_prices (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    key VARCHAR(255) NOT NULL,
+    value VARCHAR(255) NOT NULL,
+    extra_price DECIMAL NOT NULL,
+    product_id INT REFERENCES "_products"("id")
+)

@@ -7,21 +7,21 @@ import (
 )
 
 type User struct {
-	Role UserRole `json:"role"`
+	Role UserRole `json:"role,omitempty"`
 
-	Email    string `json:"email"`
+	Email    string `json:"email,omitempty"`
 	Password string `json:"-"`
 
 	// vendor
-	FullName          string    `json:"fullName"`
-	NationalID        string    `json:"nationalId"`
-	PostalCode        string    `json:"postalCode"`
-	Address           string    `json:"address"`
-	IsCompleteProfile bool      `json:"isCompleteProfile"`
-	CompleteProfileAt time.Time `json:"completeProfileAt"`
-	IsVerified        bool      `json:"isVerified"`
-	VerifiedBy        *User     `json:"verifiedBy"`
-	VerifiedDate      time.Time `json:"verified_date"`
+	FullName          string    `json:"fullName,omitempty"`
+	NationalID        string    `json:"nationalId,omitempty"`
+	PostalCode        string    `json:"postalCode,omitempty"`
+	Address           string    `json:"address,omitempty"`
+	IsCompleteProfile bool      `json:"isCompleteProfile,omitempty"`
+	CompleteProfileAt time.Time `json:"completeProfileAt,omitempty"`
+	IsVerified        bool      `json:"isVerified,omitempty"`
+	VerifiedBy        *User     `json:"verifiedBy,omitempty"`
+	VerifiedDate      time.Time `json:"verified_date,omitempty"`
 
 	entity.BaseEntity
 }

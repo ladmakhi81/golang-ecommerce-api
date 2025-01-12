@@ -14,6 +14,9 @@ import (
 	errorhandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/error_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/storage"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/validation"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/product"
+	productrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/product/repository"
+	productservice "github.com/ladmakhi81/golang-ecommerce-api/internal/product/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/user"
 	userrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/user/repository"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
@@ -49,6 +52,7 @@ func main() {
 	// repositories
 	userRepo := userrepository.NewUserRepository(storage)
 	categoryRepo := categoryrepository.NewCategoryRepository(storage)
+	productRepo := productrepository.NewProductRepository(storage)
 
 	// services
 	emailService := pkgemail.NewEmailService(mainConfig)
@@ -56,6 +60,7 @@ func main() {
 	userService := userservice.NewUserService(userRepo, emailService)
 	authService := authservice.NewAuthService(userService, jwtService, emailService)
 	categoryService := categoryservice.NewCategoryService(categoryRepo)
+	productService := productservice.NewProductService(userService, categoryService, productRepo, emailService)
 
 	authRouter := auth.NewAuthRouter(apiRoute, authService)
 	authRouter.SetupRouter()
@@ -65,6 +70,9 @@ func main() {
 
 	categoryRouter := category.NewCategoryRouter(apiRoute, mainConfig, categoryService)
 	categoryRouter.SetupRouter()
+
+	productRouter := product.NewProductRouter(apiRoute, mainConfig, productService)
+	productRouter.SetupRouter()
 
 	log.Println("the server is running")
 

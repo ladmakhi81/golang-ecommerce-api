@@ -86,7 +86,7 @@ func (userRepo UserRepository) CompleteProfile(user *userentity.User) error {
 }
 func (userRepo UserRepository) FindBasicUserInfoById(id uint) (*userentity.User, error) {
 	command := `
-		SELECT email, user_role, is_complete_profile FROM _users WHERE id = $1
+		SELECT email, user_role, is_complete_profile, is_verified FROM _users WHERE id = $1
 	`
 	row := userRepo.storage.DB.QueryRow(command, id)
 	user := new(userentity.User)
@@ -94,6 +94,7 @@ func (userRepo UserRepository) FindBasicUserInfoById(id uint) (*userentity.User,
 		&user.Email,
 		&user.Role,
 		&user.IsCompleteProfile,
+		&user.IsVerified,
 	)
 	if scanErr != nil {
 		if scanErr == sql.ErrNoRows {
