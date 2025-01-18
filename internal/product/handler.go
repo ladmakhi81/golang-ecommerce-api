@@ -139,3 +139,15 @@ func (productHandler ProductHandler) DeletePriceItem(c echo.Context) error {
 	}
 	return nil
 }
+func (productHandler ProductHandler) GetPricesOfProduct(c echo.Context) error {
+	productId, parseErr := productHandler.util.NumericParamConvertor(c.Param("productId"), "invalid product")
+	if parseErr != nil {
+		return parseErr
+	}
+	prices, pricesErr := productHandler.productPriceService.FindPricesByProductId(productId)
+	if pricesErr != nil {
+		return pricesErr
+	}
+	c.JSON(http.StatusOK, map[string]any{"prices": prices})
+	return nil
+}

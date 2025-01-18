@@ -7,6 +7,9 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/auth"
 	authservice "github.com/ladmakhi81/golang-ecommerce-api/internal/auth/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/cart"
+	cartrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/cart/repository"
+	cartservice "github.com/ladmakhi81/golang-ecommerce-api/internal/cart/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/category"
 	categoryrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/category/repository"
 	categoryservice "github.com/ladmakhi81/golang-ecommerce-api/internal/category/service"
@@ -54,6 +57,7 @@ func main() {
 	categoryRepo := categoryrepository.NewCategoryRepository(storage)
 	productRepo := productrepository.NewProductRepository(storage)
 	productPriceRepo := productrepository.NewProductPriceRepository(storage)
+	cartRepo := cartrepository.NewCartRepository(storage)
 
 	// services
 	emailService := pkgemail.NewEmailService(mainConfig)
@@ -63,6 +67,7 @@ func main() {
 	categoryService := categoryservice.NewCategoryService(categoryRepo)
 	productService := productservice.NewProductService(userService, categoryService, productRepo, emailService)
 	productPriceService := productservice.NewProductPriceService(productService, productPriceRepo)
+	cartService := cartservice.NewCartService(cartRepo, productService, productPriceService, userService)
 
 	authRouter := auth.NewAuthRouter(apiRoute, authService)
 	authRouter.SetupRouter()
@@ -75,6 +80,9 @@ func main() {
 
 	productRouter := product.NewProductRouter(apiRoute, mainConfig, productService, productPriceService)
 	productRouter.SetupRouter()
+
+	cartRouter := cart.NewCartRouter(apiRoute, mainConfig, cartService)
+	cartRouter.Setup()
 
 	log.Println("the server is running")
 

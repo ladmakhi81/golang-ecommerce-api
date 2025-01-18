@@ -51,6 +51,14 @@ func (productRouter ProductRouter) SetupRouter() {
 	)
 
 	productsApi.GET(
+		"/prices/:productId",
+		productRouter.productHandler.GetPricesOfProduct,
+		middlewares.AuthMiddleware(
+			productRouter.config.SecretKey,
+		),
+	)
+
+	productsApi.GET(
 		"/:id",
 		productRouter.productHandler.FindProductDetailById,
 		middlewares.AuthMiddleware(

@@ -71,3 +71,28 @@ func (productPriceService ProductPriceService) IsProductPriceItemExist(priceItem
 	}
 	return isExist, nil
 }
+func (productPriceService ProductPriceService) FindPriceItemById(priceItemID uint) (*productentity.ProductPrice, error) {
+	priceItem, priceItemErr := productPriceService.productPriceRepo.FindPriceItemById(priceItemID)
+	if priceItemErr != nil {
+		return nil, types.NewServerError(
+			"error in finding price item",
+			"ProductPriceService.FindPriceItemById",
+			priceItemErr,
+		)
+	}
+	if priceItem == nil {
+		return nil, types.NewClientError("price item not found", http.StatusNotFound)
+	}
+	return priceItem, nil
+}
+func (productPriceService ProductPriceService) FindPricesByProductId(productId uint) (*[]productentity.ProductPrice, error) {
+	prices, priceErr := productPriceService.productPriceRepo.FindPricesByProductId(productId)
+	if priceErr != nil {
+		return nil, types.NewServerError(
+			"error in finding prices based on product id",
+			"ProductPriceService.productPriceRepo.FindPricesByProductId",
+			priceErr,
+		)
+	}
+	return prices, nil
+}

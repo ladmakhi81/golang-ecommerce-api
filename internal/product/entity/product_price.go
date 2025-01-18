@@ -3,10 +3,10 @@ package productentity
 import "github.com/ladmakhi81/golang-ecommerce-api/internal/common/entity"
 
 type ProductPrice struct {
-	Key        string  `json:"key"`
-	Value      string  `json:"value"`
-	ExtraPrice float32 `json:"extraPrice"`
-	ProductID  uint    `json:"productId"`
+	Key        string  `json:"key,omitempty"`
+	Value      string  `json:"value,omitempty"`
+	ExtraPrice float32 `json:"extraPrice,omitempty"`
+	ProductID  uint    `json:"productId,omitempty"`
 
 	entity.BaseEntity
 }

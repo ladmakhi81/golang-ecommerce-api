@@ -66,3 +66,48 @@ func (productPriceRepository ProductPriceRepository) IsProductPriceItemExist(id 
 	}
 	return count > 0, nil
 }
+func (productPriceRepository ProductPriceRepository) FindPriceItemById(priceItemID uint) (*productentity.ProductPrice, error) {
+	command := `
+		SELECT id, key, value, extra_price FROM _product_prices WHERE id = $1
+	`
+	row := productPriceRepository.storage.DB.QueryRow(command, priceItemID)
+	priceItem := new(productentity.ProductPrice)
+	scanErr := row.Scan(
+		&priceItem.ID,
+		&priceItem.Key,
+		&priceItem.Value,
+		&priceItem.ExtraPrice,
+	)
+	if scanErr != nil {
+		if scanErr == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, scanErr
+	}
+	return priceItem, nil
+}
+func (productPriceRepository ProductPriceRepository) FindPricesByProductId(productId uint) (*[]productentity.ProductPrice, error) {
+	command := `
+		SELECT id, key, value, extra_price FROM _product_prices WHERE product_id = $1
+	`
+	rows, rowsErr := productPriceRepository.storage.DB.Query(command, productId)
+	if rowsErr != nil {
+		return nil, rowsErr
+	}
+	defer rows.Close()
+	productPrices := []productentity.ProductPrice{}
+	for rows.Next() {
+		priceItem := productentity.ProductPrice{}
+		scanErr := rows.Scan(
+			&priceItem.ID,
+			&priceItem.Key,
+			&priceItem.Value,
+			&priceItem.ExtraPrice,
+		)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		productPrices = append(productPrices, priceItem)
+	}
+	return &productPrices, nil
+}
