@@ -1,4 +1,4 @@
-package payment_entity
+package paymententity
 
 import (
 	"time"
@@ -9,11 +9,28 @@ import (
 )
 
 type Payment struct {
-	Customer        *user_entity.User
-	Status          PaymentStatus
-	StatusChangedAt time.Time
-	Order           *order_entity.Order
-	Amount          float32
+	Customer        *user_entity.User   `json:"customer"`
+	Status          PaymentStatus       `json:"status"`
+	StatusChangedAt time.Time           `json:"statusChangedAt"`
+	Order           *order_entity.Order `json:"order"`
+	Amount          float32             `json:"amount"`
+	Authority       string              `json:"authority"`
+	MerchantID      string              `json:"merchant_id"`
 
 	entity.BaseEntity
+}
+
+func NewPayment(
+	order *order_entity.Order,
+	authority,
+	merchantID string,
+) *Payment {
+	return &Payment{
+		Customer:   order.Customer,
+		Status:     PaymentStatusPending,
+		Order:      order,
+		Amount:     order.FinalPrice,
+		Authority:  authority,
+		MerchantID: merchantID,
+	}
 }

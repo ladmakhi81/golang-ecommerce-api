@@ -1,4 +1,4 @@
-package order_entity
+package orderentity
 
 import (
 	"time"
@@ -15,4 +15,14 @@ type Order struct {
 	Items           []*OrderItem
 
 	entity.BaseEntity
+}
+
+func NewOrder(
+	customer *user_entity.User,
+	finalPrice float32,
+) *Order {
+	return &Order{
+		Customer:   customer,
+		FinalPrice: finalPrice,
+	}
 }

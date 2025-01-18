@@ -1,4 +1,4 @@
-package order_entity
+package orderentity
 
 type OrderStatus string
 

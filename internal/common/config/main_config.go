@@ -28,6 +28,13 @@ type MainConfig struct {
 	MailHost     string `koanf:"mail_host" validate:"required"`
 	MailUser     string `koanf:"mail_user" validate:"required"`
 	MailPassword string `koanf:"mail_password" validate:"required"`
+
+	// zarinpal
+	ZarinpalRequestURL  string `koanf:"zarinpal_request_url" validate:"required"`
+	ZarinpalMerchantID  string `koanf:"zarinpal_merchant_id" validate:"required"`
+	ZarinpalVerifyURL   string `koanf:"zarinpal_verify_url" validate:"required"`
+	ZarinpalPayURL      string `koanf:"zarinpal_pay_url" validate:"required"`
+	ZarinpalCallbackURL string `koanf:"zarinpal_callback_url" validate:"required"`
 }
 
 func NewMainConfig() MainConfig {

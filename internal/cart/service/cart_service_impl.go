@@ -44,13 +44,9 @@ func (cartService CartService) AddProductToCart(customerID uint, reqBody cartdto
 	if priceItem == nil {
 		return nil, types.NewClientError("price item not found", http.StatusNotFound)
 	}
-	duplicatedCart, duplicatedCartErr := cartService.cartRepo.FindCustomerCartByProductId(customerID, reqBody.ProductID)
+	duplicatedCart, duplicatedCartErr := cartService.FindCustomerCartByProductIdAndPriceId(customerID, reqBody.ProductID, reqBody.PriceItemID)
 	if duplicatedCartErr != nil {
-		return nil, types.NewServerError(
-			"error in finding customer cart by product id",
-			"CartService.AddProductToCart.FindCustomerCartByProductId",
-			duplicatedCartErr,
-		)
+		return nil, duplicatedCartErr
 	}
 	if duplicatedCart != nil {
 		return nil, types.NewClientError("this cart created before", http.StatusConflict)
@@ -69,8 +65,8 @@ func (cartService CartService) AddProductToCart(customerID uint, reqBody cartdto
 	}
 	return createdCart, nil
 }
-func (cartService CartService) FindCustomerCartByProductId(customerID, productID uint) (*cartentity.Cart, error) {
-	cart, cartErr := cartService.cartRepo.FindCustomerCartByProductId(customerID, productID)
+func (cartService CartService) FindCustomerCartByProductIdAndPriceId(customerID, productID uint, priceID uint) (*cartentity.Cart, error) {
+	cart, cartErr := cartService.cartRepo.FindCustomerCartByProductIdAndPriceId(customerID, productID, priceID)
 	if cartErr != nil {
 		return nil, types.NewServerError(
 			"error in finding carts of customer",
@@ -148,4 +144,22 @@ func (cartService CartService) FindCustomerCart(customerId uint) ([]*cartentity.
 		)
 	}
 	return carts, nil
+}
+func (cartService CartService) FindCartsByIds(ids []uint) ([]*cartentity.Cart, error) {
+	carts, cartsErr := cartService.cartRepo.FindCartsByIds(ids)
+	if cartsErr != nil {
+		return nil, types.NewServerError(
+			"error in finding carts by ids",
+			"CartService.FindCartsByIds",
+			cartsErr,
+		)
+	}
+	return carts, nil
+}
+func (cartService CartService) CalculateFinalPriceOfCarts(carts []*cartentity.Cart) float32 {
+	finalPrice := float32(0)
+	for _, cart := range carts {
+		finalPrice += cart.Product.BasePrice + cart.PriceItem.ExtraPrice
+	}
+	return finalPrice
 }

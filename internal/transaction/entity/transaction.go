@@ -1,4 +1,4 @@
-package transaction_entity
+package transactionentity
 
 import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/entity"
@@ -8,13 +8,33 @@ import (
 )
 
 type Transaction struct {
-	Payer     *user_entity.User
-	Receiver  *user_entity.User
-	Payment   *payment_entity.Payment
-	Order     *order_entity.Order
-	Authority string
-	RefID     string
-	Amount    float32
+	User      *user_entity.User       `json:"user"`
+	Payment   *payment_entity.Payment `json:"payment"`
+	Order     *order_entity.Order     `json:"order"`
+	Authority string                  `json:"authority"`
+	RefID     uint                    `json:"refId"`
+	Amount    float32                 `json:"amount"`
+	Type      TransactionType         `json:"type"`
 
 	entity.BaseEntity
+}
+
+func NewTransaction(
+	user *user_entity.User,
+	payment *payment_entity.Payment,
+	order *order_entity.Order,
+	authority string,
+	refID uint,
+	amount float32,
+	transactionType TransactionType,
+) *Transaction {
+	return &Transaction{
+		User:      user,
+		Payment:   payment,
+		Order:     order,
+		Authority: authority,
+		RefID:     refID,
+		Amount:    amount,
+		Type:      transactionType,
+	}
 }

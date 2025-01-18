@@ -1,4 +1,4 @@
-package payment_entity
+package paymententity
 
 type PaymentStatus string
 

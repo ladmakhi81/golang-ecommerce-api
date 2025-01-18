@@ -17,13 +17,22 @@ import (
 	errorhandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/error_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/storage"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/validation"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/order"
+	orderrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/order/repository"
+	orderservice "github.com/ladmakhi81/golang-ecommerce-api/internal/order/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/payment"
+	paymentrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/repository"
+	paymentservice "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/product"
 	productrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/product/repository"
 	productservice "github.com/ladmakhi81/golang-ecommerce-api/internal/product/service"
+	transactionrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/repository"
+	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/user"
 	userrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/user/repository"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
 	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
+	pkgzarinpalservice "github.com/ladmakhi81/golang-ecommerce-api/pkg/zarinpal/service"
 )
 
 func main() {
@@ -58,16 +67,23 @@ func main() {
 	productRepo := productrepository.NewProductRepository(storage)
 	productPriceRepo := productrepository.NewProductPriceRepository(storage)
 	cartRepo := cartrepository.NewCartRepository(storage)
+	orderRepo := orderrepository.NewOrderRepository(storage)
+	paymentRepo := paymentrepository.NewPaymentRepository(storage)
+	transactionRepo := transactionrepository.NewTransactionRepository(storage)
 
 	// services
+	zarinpalService := pkgzarinpalservice.NewZarinpalService(mainConfig)
 	emailService := pkgemail.NewEmailService(mainConfig)
 	jwtService := authservice.NewJwtService(mainConfig)
 	userService := userservice.NewUserService(userRepo, emailService)
 	authService := authservice.NewAuthService(userService, jwtService, emailService)
 	categoryService := categoryservice.NewCategoryService(categoryRepo)
+	transactionService := transactionservice.NewTransactionService(transactionRepo)
 	productService := productservice.NewProductService(userService, categoryService, productRepo, emailService)
 	productPriceService := productservice.NewProductPriceService(productService, productPriceRepo)
 	cartService := cartservice.NewCartService(cartRepo, productService, productPriceService, userService)
+	paymentService := paymentservice.NewPaymentService(paymentRepo, zarinpalService, transactionService)
+	orderService := orderservice.NewOrderService(userService, orderRepo, cartService, productService, paymentService)
 
 	authRouter := auth.NewAuthRouter(apiRoute, authService)
 	authRouter.SetupRouter()
@@ -83,6 +99,12 @@ func main() {
 
 	cartRouter := cart.NewCartRouter(apiRoute, mainConfig, cartService)
 	cartRouter.Setup()
+
+	orderRouter := order.NewOrderRouter(apiRoute, mainConfig, orderService)
+	orderRouter.SetupRouter()
+
+	paymentRouter := payment.NewPaymentRouter(apiRoute, mainConfig, paymentService)
+	paymentRouter.SetupRouter()
 
 	log.Println("the server is running")
 

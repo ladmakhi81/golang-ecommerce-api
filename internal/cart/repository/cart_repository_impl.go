@@ -7,6 +7,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/storage"
 	productentity "github.com/ladmakhi81/golang-ecommerce-api/internal/product/entity"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
+	"github.com/lib/pq"
 )
 
 type CartRepository struct {
@@ -38,11 +39,11 @@ func (cartRepository CartRepository) CreateProductCart(cart *cartentity.Cart) er
 	)
 	return scanErr
 }
-func (cartRepository CartRepository) FindCustomerCartByProductId(customerID, productID uint) (*cartentity.Cart, error) {
+func (cartRepository CartRepository) FindCustomerCartByProductIdAndPriceId(customerID, productID uint, priceId uint) (*cartentity.Cart, error) {
 	command := `
-		SELECT id FROM _carts WHERE product_id = $1 AND customer_id = $2
+		SELECT id FROM _carts WHERE product_id = $1 AND customer_id = $2 AND price_item_id = $3
 	`
-	row := cartRepository.storage.DB.QueryRow(command, productID, customerID)
+	row := cartRepository.storage.DB.QueryRow(command, productID, customerID, priceId)
 	var cart = new(cartentity.Cart)
 	scanErr := row.Scan(
 		&cart.ID,
@@ -106,7 +107,6 @@ func (cartRepository CartRepository) FindCustomerCart(customerId uint) ([]*carte
 		INNER JOIN _products p ON p.id = c.product_id
 		INNER JOIN _product_prices pp ON c.price_item_id = pp.id
 		WHERE c.customer_id = $1
-
 	`
 	rows, rowsErr := cartRepository.storage.DB.Query(command, customerId)
 	if rowsErr != nil {
@@ -130,6 +130,56 @@ func (cartRepository CartRepository) FindCustomerCart(customerId uint) ([]*carte
 			&cart.PriceItem.Key,
 			&cart.PriceItem.Value,
 			&cart.PriceItem.ExtraPrice,
+		)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		carts = append(carts, cart)
+	}
+	return carts, nil
+}
+func (cartRepository CartRepository) FindCartsByIds(ids []uint) ([]*cartentity.Cart, error) {
+	command := `
+		SELECT
+			c.id, c.created_at, c.quantity,
+			p.id, p.name, p.description, p.base_price,
+			pp.id, pp.key, pp.value, pp.extra_price,
+			u.id, u.email
+		FROM _carts c
+			INNER JOIN _products p ON p.id = c.product_id
+			INNER JOIN _product_prices pp ON c.price_item_id = pp.id
+			INNER JOIN _users u ON c.customer_id = u.id
+		WHERE c.id = ANY($1)
+	`
+
+	rows, rowsErr := cartRepository.storage.DB.Query(
+		command,
+		pq.Array(ids),
+	)
+	if rowsErr != nil {
+		return nil, rowsErr
+	}
+	defer rows.Close()
+	carts := []*cartentity.Cart{}
+	for rows.Next() {
+		cart := new(cartentity.Cart)
+		cart.Product = new(productentity.Product)
+		cart.PriceItem = new(productentity.ProductPrice)
+		cart.Customer = new(userentity.User)
+		scanErr := rows.Scan(
+			&cart.ID,
+			&cart.CreatedAt,
+			&cart.Quantity,
+			&cart.Product.ID,
+			&cart.Product.Name,
+			&cart.Product.Description,
+			&cart.Product.BasePrice,
+			&cart.PriceItem.ID,
+			&cart.PriceItem.Key,
+			&cart.PriceItem.Value,
+			&cart.PriceItem.ExtraPrice,
+			&cart.Customer.ID,
+			&cart.Customer.Email,
 		)
 		if scanErr != nil {
 			return nil, scanErr
