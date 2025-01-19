@@ -1,6 +1,8 @@
 package transactionrepository
 
 import (
+	"database/sql"
+
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/storage"
 	orderentity "github.com/ladmakhi81/golang-ecommerce-api/internal/order/entity"
 	paymententity "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/entity"
@@ -80,4 +82,21 @@ func (transactionRepo TransactionRepository) GetTransactionsPage(page, limit uin
 		transactions = append(transactions, transaction)
 	}
 	return transactions, nil
+}
+func (transactionRepo TransactionRepository) GetOrderIdOfTransaction(transactionId uint) (*uint, error) {
+	command := `
+		SELECT order_id
+		FROM _transactions
+		WHERE id = $1
+	`
+	var orderID *uint
+	row := transactionRepo.storage.DB.QueryRow(command)
+	scanErr := row.Scan(orderID)
+	if scanErr != nil {
+		if scanErr == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, scanErr
+	}
+	return orderID, nil
 }

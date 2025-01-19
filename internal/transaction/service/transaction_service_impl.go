@@ -49,7 +49,14 @@ func (transactionService TransactionService) GetTransactionsPage(page, limit uin
 	}
 	return transactions, nil
 }
-func (transactionService TransactionService) CreateVendorIncome(transaction *transactionentity.Transaction) (*transactionentity.Transaction, error) {
-	// transaction.Order
-	return nil, nil
+func (transactionService TransactionService) GetOrderIdOfTransaction(transactionId uint) (*uint, error) {
+	orderId, orderIdErr := transactionService.transactionRepo.GetOrderIdOfTransaction(transactionId)
+	if orderIdErr != nil {
+		return nil, types.NewServerError(
+			"error in finding order id based on transaction id",
+			"TransactionService.GetOrderIdOfTransaction",
+			orderIdErr,
+		)
+	}
+	return orderId, nil
 }

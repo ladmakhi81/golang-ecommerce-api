@@ -10,29 +10,26 @@ import (
 	paymentdto "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/dto"
 	paymententity "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/entity"
 	paymentrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/repository"
-	transactionevent "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/event"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 	pkgzarinpalservice "github.com/ladmakhi81/golang-ecommerce-api/pkg/zarinpal/service"
 )
 
 type PaymentService struct {
-	paymentRepo                paymentrepository.IPaymentRepository
-	zarinpalService            pkgzarinpalservice.IZarinpalService
-	transactionService         transactionservice.ITransactionService
-	transactionEventsPublisher transactionevent.TransactionEventsPublisher
+	paymentRepo        paymentrepository.IPaymentRepository
+	zarinpalService    pkgzarinpalservice.IZarinpalService
+	transactionService transactionservice.ITransactionService
+	// vendorIncomeEventsPublisher vendorincomeevent.VendorIncomeEventsPublisher
 }
 
 func NewPaymentService(
 	paymentRepo paymentrepository.IPaymentRepository,
 	zarinpalService pkgzarinpalservice.IZarinpalService,
 	transactionService transactionservice.ITransactionService,
-	transactionEventsPublisher transactionevent.TransactionEventsPublisher,
 ) PaymentService {
 	return PaymentService{
-		paymentRepo:                paymentRepo,
-		zarinpalService:            zarinpalService,
-		transactionService:         transactionService,
-		transactionEventsPublisher: transactionEventsPublisher,
+		paymentRepo:        paymentRepo,
+		zarinpalService:    zarinpalService,
+		transactionService: transactionService,
 	}
 }
 

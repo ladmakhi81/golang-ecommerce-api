@@ -1,20 +1,20 @@
-package transactionevent
+package vendorincomeevent
 
 import "github.com/ladmakhi81/golang-ecommerce-api/internal/events"
 
-type TransactionEventsPublisher struct {
+type VendorIncomeEventsPublisher struct {
 	eventsContainer *events.EventsContainer
 }
 
-func NewTransactionEventsPublisher(
+func NewVendorIncomeEventsPublisher(
 	eventsContainer *events.EventsContainer,
-) TransactionEventsPublisher {
-	return TransactionEventsPublisher{
+) VendorIncomeEventsPublisher {
+	return VendorIncomeEventsPublisher{
 		eventsContainer: eventsContainer,
 	}
 }
 
-func (publisher TransactionEventsPublisher) PublishCalculateVendorIncomeEvent(eventBody CalculateVendorIncomeEventBody) {
+func (publisher VendorIncomeEventsPublisher) PublishCalculateVendorIncomeEvent(eventBody CalculateVendorIncomeEventBody) {
 	publisher.eventsContainer.PublishEvent(
 		events.NewEvent(
 			CALCULATE_VENDOR_INCOME_EVENT,

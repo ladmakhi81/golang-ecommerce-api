@@ -95,3 +95,10 @@ func (orderService OrderService) SubmitOrder(customerId uint, reqBody orderdto.C
 	)
 	return res, nil
 }
+func (orderService OrderService) FindOrderItemsByOrderId(orderId uint) ([]*orderentity.OrderItem, error) {
+	orderItems, orderItemsErr := orderService.orderRepo.FindOrderItemsByOrderId(orderId)
+	if orderItemsErr != nil {
+		return nil, types.NewServerError("error in finding order items", "OrderService.FindOrderItemsByOrderId", orderItemsErr)
+	}
+	return orderItems, nil
+}

@@ -1,4 +1,4 @@
-package transactionevent
+package vendorincomeevent
 
 const (
 	CALCULATE_VENDOR_INCOME_EVENT = "CALCULATE_VENDOR_INCOME_EVENT"

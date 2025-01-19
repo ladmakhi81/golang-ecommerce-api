@@ -1,4 +1,4 @@
-package transactionevent
+package vendorincomeevent
 
 import (
 	transactionentity "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/entity"
