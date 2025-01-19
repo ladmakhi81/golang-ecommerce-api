@@ -10,7 +10,7 @@ const (
 	OrderStatusDone        = "Done"
 )
 
-func IsValid(status OrderStatus) bool {
+func (status OrderStatus) IsValid() bool {
 	validStatuses := []OrderStatus{
 		OrderStatusDelivery,
 		OrderStatusDone,

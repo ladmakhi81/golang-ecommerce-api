@@ -8,4 +8,6 @@ import (
 type IOrderService interface {
 	SubmitOrder(customerId uint, reqBody orderdto.CreateOrderReqBody) (*orderdto.CreateOrderResponse, error)
 	FindOrderItemsByOrderId(orderId uint) ([]*orderentity.OrderItem, error)
+	ChangeOrderStatus(orderId uint, reqBody orderdto.ChangeOrderStatusReqBody) error
+	FindOrderById(id uint) (*orderentity.Order, error)
 }

@@ -1,7 +1,9 @@
 package orderservice
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 
 	cartservice "github.com/ladmakhi81/golang-ecommerce-api/internal/cart/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
@@ -11,6 +13,8 @@ import (
 	paymentservice "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/service"
 	productservice "github.com/ladmakhi81/golang-ecommerce-api/internal/product/service"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
+	pkgemaildto "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/dto"
+	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
 )
 
 type OrderService struct {
@@ -19,6 +23,7 @@ type OrderService struct {
 	cartService    cartservice.ICartService
 	productService productservice.IProductService
 	paymentService paymentservice.IPaymentService
+	emailService   pkgemail.IEmailService
 }
 
 func NewOrderService(
@@ -27,6 +32,7 @@ func NewOrderService(
 	cartService cartservice.ICartService,
 	productService productservice.IProductService,
 	paymentService paymentservice.IPaymentService,
+	emailService pkgemail.IEmailService,
 ) OrderService {
 	return OrderService{
 		userService:    userService,
@@ -34,6 +40,7 @@ func NewOrderService(
 		cartService:    cartService,
 		productService: productService,
 		paymentService: paymentService,
+		emailService:   emailService,
 	}
 }
 
@@ -104,4 +111,45 @@ func (orderService OrderService) FindOrderItemsByOrderId(orderId uint) ([]*order
 		return nil, types.NewServerError("error in finding order items", "OrderService.FindOrderItemsByOrderId", orderItemsErr)
 	}
 	return orderItems, nil
+}
+func (orderService OrderService) FindOrderById(id uint) (*orderentity.Order, error) {
+	order, orderErr := orderService.orderRepo.FindOrderById(id)
+	if orderErr != nil {
+		return nil, types.NewServerError(
+			"error in finding order by id",
+			"OrderService.FindOrderById",
+			orderErr,
+		)
+	}
+	if order == nil {
+		return nil, types.NewClientError("order not found", http.StatusNotFound)
+	}
+	return order, nil
+}
+func (orderService OrderService) ChangeOrderStatus(orderId uint, reqBody orderdto.ChangeOrderStatusReqBody) error {
+	order, orderErr := orderService.FindOrderById(orderId)
+	if orderErr != nil {
+		return orderErr
+	}
+	order.Status = reqBody.Status
+	order.StatusChangedAt = time.Now()
+	if updateErr := orderService.orderRepo.ChanegOrderStatus(order); updateErr != nil {
+		return types.NewServerError(
+			"error in updating order status",
+			"orderService.ChangeOrderStatus",
+			updateErr,
+		)
+	}
+	orderService.emailService.SendEmail(
+		pkgemaildto.NewSendEmailDto(
+			order.Customer.Email,
+			"Order Updated",
+			fmt.Sprintf("Your Order With ID %d Updated To %s In %s",
+				order.ID,
+				order.Status,
+				order.StatusChangedAt.Format("2006-01-02 15:04:05"),
+			),
+		),
+	)
+	return nil
 }

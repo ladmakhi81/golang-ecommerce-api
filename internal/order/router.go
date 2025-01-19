@@ -29,9 +29,17 @@ func NewOrderRouter(
 func (orderRouter OrderRouter) SetupRouter() {
 	orderApi := orderRouter.apiRouter.Group("/orders")
 
+	orderApi.Use(
+		middlewares.AuthMiddleware(orderRouter.config.SecretKey),
+	)
+
 	orderApi.POST(
 		"",
 		orderRouter.orderHandler.CreateOrder,
-		middlewares.AuthMiddleware(orderRouter.config.SecretKey),
+	)
+
+	orderApi.PATCH(
+		"/:orderId",
+		orderRouter.orderHandler.UpdateOrderStatus,
 	)
 }

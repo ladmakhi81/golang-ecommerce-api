@@ -6,4 +6,6 @@ type IOrderRepository interface {
 	CreateOrder(order *orderentity.Order) error
 	CreateOrderItem(orderItem *orderentity.OrderItem) error
 	FindOrderItemsByOrderId(orderId uint) ([]*orderentity.OrderItem, error)
+	ChanegOrderStatus(order *orderentity.Order) error
+	FindOrderById(id uint) (*orderentity.Order, error)
 }

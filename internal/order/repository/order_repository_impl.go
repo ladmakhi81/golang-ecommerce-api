@@ -1,6 +1,8 @@
 package orderrepository
 
 import (
+	"database/sql"
+
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/storage"
 	orderentity "github.com/ladmakhi81/golang-ecommerce-api/internal/order/entity"
 	productentity "github.com/ladmakhi81/golang-ecommerce-api/internal/product/entity"
@@ -103,4 +105,42 @@ func (orderRepo OrderRepository) FindOrderItemsByOrderId(orderId uint) ([]*order
 		orderItems = append(orderItems, item)
 	}
 	return orderItems, nil
+}
+func (orderRepo OrderRepository) ChanegOrderStatus(order *orderentity.Order) error {
+	command := `
+		UPDATE _orders SET
+		status = $1,
+		status_changed_at = $2
+		WHERE id = $3;
+	`
+	row := orderRepo.storage.DB.QueryRow(command, order.Status, order.StatusChangedAt, order.ID)
+	return row.Err()
+}
+func (orderRepo OrderRepository) FindOrderById(id uint) (*orderentity.Order, error) {
+	command := `
+		SELECT 
+		o.id, o.status, o.final_price, o.status_changed_at ,
+		u.id, u.email
+		FROM _orders o
+		INNER JOIN _users u ON o.customer_id = u.id
+		WHERE o.id = $1
+	`
+	row := orderRepo.storage.DB.QueryRow(command, id)
+	order := new(orderentity.Order)
+	order.Customer = new(userentity.User)
+	scanErr := row.Scan(
+		&order.ID,
+		&order.Status,
+		&order.FinalPrice,
+		&order.StatusChangedAt,
+		&order.Customer.ID,
+		&order.Customer.Email,
+	)
+	if scanErr != nil {
+		if scanErr == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, scanErr
+	}
+	return order, nil
 }

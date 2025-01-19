@@ -92,7 +92,7 @@ func main() {
 	productPriceService := productservice.NewProductPriceService(productService, productPriceRepo)
 	cartService := cartservice.NewCartService(cartRepo, productService, productPriceService, userService)
 	paymentService := paymentservice.NewPaymentService(paymentRepo, zarinpalService, transactionService, &eventContainer)
-	orderService := orderservice.NewOrderService(userService, orderRepo, cartService, productService, paymentService)
+	orderService := orderservice.NewOrderService(userService, orderRepo, cartService, productService, paymentService, emailService)
 	vendorIncomeService := vendorincomeservice.NewVendorIncomeService(vendorIncomeRepo, orderService, transactionService)
 
 	// event subscribers
