@@ -13,3 +13,11 @@ func NewCalculateVendorIncomeEventBody(
 		Transaction: transaction,
 	}
 }
+
+type PayedOrderEventBody struct {
+	OrderId uint
+}
+
+func NewPayedOrderEventBody(orderId uint) PayedOrderEventBody {
+	return PayedOrderEventBody{OrderId: orderId}
+}

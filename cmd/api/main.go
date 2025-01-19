@@ -19,6 +19,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/validation"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/events"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/order"
+	orderevent "github.com/ladmakhi81/golang-ecommerce-api/internal/order/event"
 	orderrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/order/repository"
 	orderservice "github.com/ladmakhi81/golang-ecommerce-api/internal/order/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/payment"
@@ -97,10 +98,14 @@ func main() {
 
 	// event subscribers
 	vendorIncomeEventSubscriber := vendorincomeevent.NewVendorIncomeEventsSubscriber(vendorIncomeService)
+	orderEventSubscriber := orderevent.NewOrderEventsSubscriber(orderService)
 
 	// event containers
 	vendorIncomeEventContainer := vendorincomeevent.NewVendorIncomeEventsContainer(&eventContainer, vendorIncomeEventSubscriber)
 	vendorIncomeEventContainer.RegisterEvents()
+
+	orderEventContainer := orderevent.NewOrderEventsContainer(&eventContainer, orderEventSubscriber)
+	orderEventContainer.RegisterEvents()
 
 	authRouter := auth.NewAuthRouter(apiRoute, authService)
 	authRouter.SetupRouter()

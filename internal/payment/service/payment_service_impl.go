@@ -99,7 +99,6 @@ func (paymentService PaymentService) VerifyPayment(customerId uint, reqBody paym
 		refId := verifyRes.Data.RefID
 		payment.Status = paymententity.PaymentStatusSuccess
 		payment.StatusChangedAt = time.Now()
-		// transaction of customer
 		customerTransaction, customerTransactionErr := paymentService.transactionService.CreateTransaction(
 			payment,
 			refId,
@@ -108,11 +107,16 @@ func (paymentService PaymentService) VerifyPayment(customerId uint, reqBody paym
 		if customerTransactionErr != nil {
 			return customerTransactionErr
 		}
-
 		paymentService.eventsContainer.PublishEvent(
 			events.NewEvent(
 				events.CALCULATE_VENDOR_INCOME_EVENT,
 				events.NewCalculateVendorIncomeEventBody(customerTransaction),
+			),
+		)
+		paymentService.eventsContainer.PublishEvent(
+			events.NewEvent(
+				events.PAYED_ORDER_EVENT,
+				events.NewPayedOrderEventBody(payment.Order.ID),
 			),
 		)
 
