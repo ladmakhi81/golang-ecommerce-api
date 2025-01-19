@@ -188,3 +188,10 @@ func (cartRepository CartRepository) FindCartsByIds(ids []uint) ([]*cartentity.C
 	}
 	return carts, nil
 }
+func (cartRepository CartRepository) DeleteCartsByIds(ids []uint) error {
+	command := `
+		DELETE FROM _carts WHERE id = ANY($1)
+	`
+	row := cartRepository.storage.DB.QueryRow(command, pq.Array(ids))
+	return row.Err()
+}

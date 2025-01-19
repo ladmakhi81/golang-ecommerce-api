@@ -14,4 +14,5 @@ type ICartService interface {
 	FindCustomerCart(customerId uint) ([]*cartentity.Cart, error)
 	FindCartsByIds(ids []uint) ([]*cartentity.Cart, error)
 	CalculateFinalPriceOfCarts(carts []*cartentity.Cart) float32
+	DeleteCartsByIds(ids []uint) error
 }

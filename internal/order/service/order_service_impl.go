@@ -84,6 +84,9 @@ func (orderService OrderService) SubmitOrder(customerId uint, reqBody orderdto.C
 		}
 		order.Items = append(order.Items, orderItem)
 	}
+	if deleteCartsErr := orderService.cartService.DeleteCartsByIds(reqBody.CartIds); deleteCartsErr != nil {
+		return nil, deleteCartsErr
+	}
 	payment, paymentErr := orderService.paymentService.CreatePayment(order)
 	if paymentErr != nil {
 		return nil, paymentErr

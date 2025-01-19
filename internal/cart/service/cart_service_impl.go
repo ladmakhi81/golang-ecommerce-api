@@ -163,3 +163,14 @@ func (cartService CartService) CalculateFinalPriceOfCarts(carts []*cartentity.Ca
 	}
 	return finalPrice
 }
+func (cartService CartService) DeleteCartsByIds(ids []uint) error {
+	deleteErr := cartService.cartRepo.DeleteCartsByIds(ids)
+	if deleteErr != nil {
+		return types.NewServerError(
+			"error in deleting carts by ids",
+			"CartService.DeleteCartsByIds",
+			deleteErr,
+		)
+	}
+	return nil
+}

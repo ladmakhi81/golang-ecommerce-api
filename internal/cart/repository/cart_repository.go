@@ -10,4 +10,5 @@ type ICartRepository interface {
 	FindCartById(cartID uint) (*cartentity.Cart, error)
 	FindCustomerCart(customerId uint) ([]*cartentity.Cart, error)
 	FindCartsByIds(ids []uint) ([]*cartentity.Cart, error)
+	DeleteCartsByIds(ids []uint) error
 }
