@@ -17,6 +17,7 @@ import (
 	errorhandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/error_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/storage"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/validation"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/events"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/order"
 	orderrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/order/repository"
 	orderservice "github.com/ladmakhi81/golang-ecommerce-api/internal/order/service"
@@ -27,6 +28,7 @@ import (
 	productrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/product/repository"
 	productservice "github.com/ladmakhi81/golang-ecommerce-api/internal/product/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/transaction"
+	transactionevent "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/event"
 	transactionrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/repository"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/user"
@@ -62,6 +64,12 @@ func main() {
 
 	apiRoute := server.Group("/api/v1")
 
+	// event container
+	eventContainer := events.NewEventsContainer()
+
+	// publisher
+	transactionEventsPublisher := transactionevent.NewTransactionEventsPublisher(&eventContainer)
+
 	// repositories
 	userRepo := userrepository.NewUserRepository(storage)
 	categoryRepo := categoryrepository.NewCategoryRepository(storage)
@@ -83,8 +91,12 @@ func main() {
 	productService := productservice.NewProductService(userService, categoryService, productRepo, emailService)
 	productPriceService := productservice.NewProductPriceService(productService, productPriceRepo)
 	cartService := cartservice.NewCartService(cartRepo, productService, productPriceService, userService)
-	paymentService := paymentservice.NewPaymentService(paymentRepo, zarinpalService, transactionService)
+	paymentService := paymentservice.NewPaymentService(paymentRepo, zarinpalService, transactionService, transactionEventsPublisher)
 	orderService := orderservice.NewOrderService(userService, orderRepo, cartService, productService, paymentService)
+
+	// events
+	transactionEvents := transactionevent.NewTransactionEventsContainer(&eventContainer, transactionService)
+	transactionEvents.RegisterEvents()
 
 	authRouter := auth.NewAuthRouter(apiRoute, authService)
 	authRouter.SetupRouter()
