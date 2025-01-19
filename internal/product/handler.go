@@ -55,7 +55,14 @@ func (productHandler ProductHandler) ConfirmProductByAdmin(c echo.Context) error
 	if parseProductIdErr != nil {
 		return parseProductIdErr
 	}
-	if confirmErr := productHandler.productService.ConfirmProductByAdmin(adminId, productId); confirmErr != nil {
+	var reqBody productdto.VerifyProductReqBody
+	if err := c.Bind(&reqBody); err != nil {
+		return types.NewClientError("invalid request body", http.StatusBadRequest)
+	}
+	if err := c.Validate(reqBody); err != nil {
+		return err
+	}
+	if confirmErr := productHandler.productService.ConfirmProductByAdmin(adminId, productId, reqBody.Fee); confirmErr != nil {
 		return confirmErr
 	}
 	return nil

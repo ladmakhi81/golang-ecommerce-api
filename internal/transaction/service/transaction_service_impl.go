@@ -5,6 +5,7 @@ import (
 	paymententity "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/entity"
 	transactionentity "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/entity"
 	transactionrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/repository"
+	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
 type TransactionService struct {
@@ -19,20 +20,20 @@ func NewTransactionService(
 	}
 }
 
-func (transactionService TransactionService) CreatePaymentTransaction(payment *paymententity.Payment, refId uint) (*transactionentity.Transaction, error) {
+func (transactionService TransactionService) CreateTransaction(payment *paymententity.Payment, refId uint, user *userentity.User, transactionType transactionentity.TransactionType) (*transactionentity.Transaction, error) {
 	transaction := transactionentity.NewTransaction(
-		payment.Customer,
+		user,
 		payment,
 		payment.Order,
 		payment.Authority,
 		refId,
 		payment.Amount,
-		transactionentity.TransactionTypePayment,
+		transactionType,
 	)
 	if transactionErr := transactionService.transactionRepo.CreateTransaction(transaction); transactionErr != nil {
 		return nil, types.NewServerError(
 			"error in creating transaction",
-			"TransactionService.CreatePaymentTransaction.CreateTransaction",
+			"TransactionService.CreateTransaction",
 			transactionErr,
 		)
 	}

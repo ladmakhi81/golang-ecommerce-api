@@ -81,7 +81,7 @@ func (productService ProductService) CreateProduct(reqBody productdto.CreateProd
 	)
 	return product, nil
 }
-func (productService ProductService) ConfirmProductByAdmin(adminId uint, productId uint) error {
+func (productService ProductService) ConfirmProductByAdmin(adminId uint, productId uint, fee float32) error {
 	product, productErr := productService.FindProductById(productId)
 	if productErr != nil {
 		return productErr
@@ -90,8 +90,15 @@ func (productService ProductService) ConfirmProductByAdmin(adminId uint, product
 	if adminErr != nil {
 		return adminErr
 	}
+	if fee > product.BasePrice {
+		return types.NewClientError("fee must be less than base price of products", http.StatusBadRequest)
+	}
+	if product.IsConfirmed {
+		return types.NewClientError("product verified before", http.StatusBadRequest)
+	}
 	product.ConfirmedBy = admin
 	product.IsConfirmed = true
+	product.Fee = fee
 	product.ConfirmedAt = time.Now()
 	if updateErr := productService.productRepo.UpdateProductById(product); updateErr != nil {
 		return types.NewServerError(

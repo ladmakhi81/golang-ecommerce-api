@@ -7,7 +7,7 @@ import (
 
 type IProductService interface {
 	CreateProduct(reqBody productdto.CreateProductReqBody, vendorID uint) (*productentity.Product, error)
-	ConfirmProductByAdmin(adminId uint, productId uint) error
+	ConfirmProductByAdmin(adminId uint, productId uint, fee float32) error
 	FindProductById(id uint) (*productentity.Product, error)
 	GetProductsPage(page, limit uint) ([]*productentity.Product, error)
 	DeleteProductById(productId, userId uint) error

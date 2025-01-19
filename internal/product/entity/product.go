@@ -19,6 +19,7 @@ type Product struct {
 	ConfirmedBy   *user_entity.User         `json:"confirmedBy,omitempty"`
 	ConfirmedAt   time.Time                 `json:"confirmedAt,omitempty"`
 	ProductPrices []*ProductPrice           `json:"productPrices,omitempty"`
+	Fee           float32                   `json:"fee,omitempty"`
 
 	entity.BaseEntity
 }

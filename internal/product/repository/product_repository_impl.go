@@ -55,8 +55,9 @@ func (productRepo ProductRepository) UpdateProductById(product *productentity.Pr
 			tags = $3,
 			is_confirmed = $4,
 			confirmed_by_id = $5,
-			confirmed_at = $6
-		WHERE id = $7
+			confirmed_at = $6,
+			fee = $7
+		WHERE id = $8
 	`
 	var confirmedById *uint
 	if product.ConfirmedBy != nil {
@@ -70,6 +71,7 @@ func (productRepo ProductRepository) UpdateProductById(product *productentity.Pr
 		product.IsConfirmed,
 		confirmedById,
 		product.ConfirmedAt,
+		product.Fee,
 		product.ID,
 	)
 	return row.Err()
@@ -77,7 +79,7 @@ func (productRepo ProductRepository) UpdateProductById(product *productentity.Pr
 func (productRepo ProductRepository) FindProductById(id uint) (*productentity.Product, error) {
 	command := `
 		SELECT
-			p.id, p.name, p.description,
+			p.id, p.fee, p.name, p.description,
 			p.base_price, p.tags, p.is_confirmed, p.confirmed_at, p.created_at, p.updated_at,
 			uc.id, uc.full_name, uc.email,
 			c.id, c.name, c.icon, c.created_at, c.updated_at,
@@ -104,6 +106,7 @@ func (productRepo ProductRepository) FindProductById(id uint) (*productentity.Pr
 
 	scanErr := row.Scan(
 		&product.ID,
+		&product.Fee,
 		&product.Name,
 		&product.Description,
 		&product.BasePrice,
@@ -150,7 +153,7 @@ func (productRepo ProductRepository) FindProductById(id uint) (*productentity.Pr
 func (productRepo ProductRepository) FindProductsPage(page, limit uint) ([]*productentity.Product, error) {
 	command := `
 		SELECT
-			p.id, p.name, p.description,
+			p.id, p.fee, p.name, p.description,
 			p.base_price, p.tags, p.is_confirmed, p.confirmed_at, p.created_at, p.updated_at,
 			uc.id, uc.full_name, uc.email,
 			c.id, c.name, c.icon, c.created_at, c.updated_at,
@@ -181,6 +184,7 @@ func (productRepo ProductRepository) FindProductsPage(page, limit uint) ([]*prod
 
 		scanErr := rows.Scan(
 			&product.ID,
+			&product.Fee,
 			&product.Name,
 			&product.Description,
 			&product.BasePrice,

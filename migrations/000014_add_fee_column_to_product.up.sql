@@ -1,0 +1,4 @@
+ALTER TABLE
+    _products
+ADD
+    fee DECIMAL DEFAULT 0

@@ -1,7 +1,6 @@
 package paymentservice
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -11,6 +10,7 @@ import (
 	paymentdto "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/dto"
 	paymententity "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/entity"
 	paymentrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/repository"
+	transactionentity "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/entity"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 	pkgzarinpalservice "github.com/ladmakhi81/golang-ecommerce-api/pkg/zarinpal/service"
 )
@@ -72,7 +72,6 @@ func (paymentService PaymentService) VerifyPayment(customerId uint, reqBody paym
 	if payment == nil {
 		return types.NewClientError("payment not found by this authority", http.StatusNotFound)
 	}
-	fmt.Println(payment.Status)
 	if payment.Status != paymententity.PaymentStatusPending {
 		return types.NewClientError("payment is verified before", http.StatusBadRequest)
 	}
@@ -97,8 +96,13 @@ func (paymentService PaymentService) VerifyPayment(customerId uint, reqBody paym
 		refId := verifyRes.Data.RefID
 		payment.Status = paymententity.PaymentStatusSuccess
 		payment.StatusChangedAt = time.Now()
-		_, transactionErr := paymentService.transactionService.CreatePaymentTransaction(payment, refId)
-		if transactionErr != nil {
+		// transaction of customer
+		if _, transactionErr := paymentService.transactionService.CreateTransaction(
+			payment,
+			refId,
+			payment.Customer,
+			transactionentity.TransactionTypePayment,
+		); transactionErr != nil {
 			return transactionErr
 		}
 	}
