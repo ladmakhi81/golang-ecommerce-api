@@ -27,11 +27,18 @@ func NewPaymentRouter(
 }
 
 func (paymentRouter PaymentRouter) SetupRouter() {
-	paymentsRouter := paymentRouter.apiRouter.Group("/payments")
+	paymentsApi := paymentRouter.apiRouter.Group("/payments")
 
-	paymentsRouter.POST(
+	paymentsApi.Use(
+		middlewares.AuthMiddleware(paymentRouter.config.SecretKey),
+	)
+
+	paymentsApi.POST(
 		"/verify",
 		paymentRouter.paymentHandler.VerifyPayment,
-		middlewares.AuthMiddleware(paymentRouter.config.SecretKey),
+	)
+	paymentsApi.GET(
+		"/page",
+		paymentRouter.paymentHandler.GetPaymentsPage,
 	)
 }

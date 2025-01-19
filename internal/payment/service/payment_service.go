@@ -10,4 +10,5 @@ type IPaymentService interface {
 	CreatePayment(order *orderentity.Order) (*paymententity.Payment, error)
 	GetPayLink(payment *paymententity.Payment) string
 	VerifyPayment(customerId uint, reqBody paymentdto.VerifyPaymentReqBody) error
+	GetPaymentsPage(page, limit uint) ([]*paymententity.Payment, error)
 }

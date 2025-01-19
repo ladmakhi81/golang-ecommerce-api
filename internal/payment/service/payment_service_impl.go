@@ -111,3 +111,14 @@ func (paymentService PaymentService) VerifyPayment(customerId uint, reqBody paym
 	}
 	return nil
 }
+func (paymentService PaymentService) GetPaymentsPage(page, limit uint) ([]*paymententity.Payment, error) {
+	payments, paymentsErr := paymentService.paymentRepo.GetPaymentsPage(page, limit)
+	if paymentsErr != nil {
+		return nil, types.NewServerError(
+			"error in finding payments page",
+			"PaymentService.GetPaymentsPage",
+			paymentsErr,
+		)
+	}
+	return payments, nil
+}

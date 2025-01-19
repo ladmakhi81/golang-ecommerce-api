@@ -87,3 +87,35 @@ func (paymentRepo PaymentRepository) UpdatePaymentStatus(payment *paymententity.
 	row := paymentRepo.storage.DB.QueryRow(command, payment.Status, payment.StatusChangedAt, payment.ID)
 	return row.Err()
 }
+func (paymentRepo PaymentRepository) GetPaymentsPage(page, limit uint) ([]*paymententity.Payment, error) {
+	command := `
+		SELECT
+		p.id, p.status, p.status_changed_at, p.amount, p.authority, p.merchant_id,
+		o.id, o.created_at, o.updated_at, o.status,
+		u.id, u.email, u.created_at, u.updated_at
+		FROM _payments p 
+		INNER JOIN _users u ON u.id = p.customer_id
+		INNER JOIN _orders o ON o.id = p.order_id
+		LIMIT $1 OFFSET $2
+	`
+	rows, rowsErr := paymentRepo.storage.DB.Query(command, limit, page)
+	if rowsErr != nil {
+		return nil, rowsErr
+	}
+	payments := []*paymententity.Payment{}
+	for rows.Next() {
+		payment := new(paymententity.Payment)
+		payment.Order = new(orderentity.Order)
+		payment.Customer = new(userentity.User)
+		scanErr := rows.Scan(
+			&payment.ID, &payment.Status, &payment.StatusChangedAt, &payment.Amount, &payment.Authority, &payment.MerchantID,
+			&payment.Order.ID, &payment.Order.CreatedAt, &payment.Order.UpdatedAt, &payment.Order.Status,
+			&payment.Customer.ID, &payment.Customer.Email, &payment.Customer.CreatedAt, &payment.Customer.UpdatedAt,
+		)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		payments = append(payments, payment)
+	}
+	return payments, nil
+}
