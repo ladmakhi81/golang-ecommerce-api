@@ -1,8 +1,6 @@
-package vendorincomeevent
+package events
 
-import (
-	transactionentity "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/entity"
-)
+import transactionentity "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/entity"
 
 type CalculateVendorIncomeEventBody struct {
 	Transaction *transactionentity.Transaction

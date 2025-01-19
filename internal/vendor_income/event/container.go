@@ -4,24 +4,24 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/events"
 )
 
-type VendorIncomeEVentsContainer struct {
+type VendorIncomeEventsContainer struct {
 	eventContainer               *events.EventsContainer
 	vendorIncomeEventsSubscriber VendorIncomeEventsSubscriber
 }
 
-func NewVendorIncomeEVentsContainer(
+func NewVendorIncomeEventsContainer(
 	eventContainer *events.EventsContainer,
 	vendorIncomeEventsSubscriber VendorIncomeEventsSubscriber,
-) VendorIncomeEVentsContainer {
-	return VendorIncomeEVentsContainer{
+) VendorIncomeEventsContainer {
+	return VendorIncomeEventsContainer{
 		eventContainer:               eventContainer,
 		vendorIncomeEventsSubscriber: vendorIncomeEventsSubscriber,
 	}
 }
 
-func (container *VendorIncomeEVentsContainer) RegisterEvents() {
+func (container *VendorIncomeEventsContainer) RegisterEvents() {
 	container.eventContainer.RegisterEvent(
-		CALCULATE_VENDOR_INCOME_EVENT,
+		events.CALCULATE_VENDOR_INCOME_EVENT,
 		container.vendorIncomeEventsSubscriber.SubscribeCalculateVendorIncome,
 	)
 }

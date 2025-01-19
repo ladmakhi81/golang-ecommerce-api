@@ -90,8 +90,8 @@ func (transactionRepo TransactionRepository) GetOrderIdOfTransaction(transaction
 		WHERE id = $1
 	`
 	var orderID *uint
-	row := transactionRepo.storage.DB.QueryRow(command)
-	scanErr := row.Scan(orderID)
+	row := transactionRepo.storage.DB.QueryRow(command, transactionId)
+	scanErr := row.Scan(&orderID)
 	if scanErr != nil {
 		if scanErr == sql.ErrNoRows {
 			return nil, nil

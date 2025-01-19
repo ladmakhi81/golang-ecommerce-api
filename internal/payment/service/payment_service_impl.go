@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/events"
 	orderentity "github.com/ladmakhi81/golang-ecommerce-api/internal/order/entity"
 	paymentdto "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/dto"
 	paymententity "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/entity"
@@ -18,18 +19,20 @@ type PaymentService struct {
 	paymentRepo        paymentrepository.IPaymentRepository
 	zarinpalService    pkgzarinpalservice.IZarinpalService
 	transactionService transactionservice.ITransactionService
-	// vendorIncomeEventsPublisher vendorincomeevent.VendorIncomeEventsPublisher
+	eventsContainer    *events.EventsContainer
 }
 
 func NewPaymentService(
 	paymentRepo paymentrepository.IPaymentRepository,
 	zarinpalService pkgzarinpalservice.IZarinpalService,
 	transactionService transactionservice.ITransactionService,
+	eventsContainer *events.EventsContainer,
 ) PaymentService {
 	return PaymentService{
 		paymentRepo:        paymentRepo,
 		zarinpalService:    zarinpalService,
 		transactionService: transactionService,
+		eventsContainer:    eventsContainer,
 	}
 }
 
@@ -97,7 +100,7 @@ func (paymentService PaymentService) VerifyPayment(customerId uint, reqBody paym
 		payment.Status = paymententity.PaymentStatusSuccess
 		payment.StatusChangedAt = time.Now()
 		// transaction of customer
-		_, customerTransactionErr := paymentService.transactionService.CreateTransaction(
+		customerTransaction, customerTransactionErr := paymentService.transactionService.CreateTransaction(
 			payment,
 			refId,
 			payment.Customer,
@@ -105,11 +108,13 @@ func (paymentService PaymentService) VerifyPayment(customerId uint, reqBody paym
 		if customerTransactionErr != nil {
 			return customerTransactionErr
 		}
-		// paymentService.transactionEventsPublisher.PublishCalculateVendorIncomeEvent(
-		// 	transactionevent.NewCalculateVendorIncomeEventBody(
-		// 		customerTransaction,
-		// 	),
-		// )
+
+		paymentService.eventsContainer.PublishEvent(
+			events.NewEvent(
+				events.CALCULATE_VENDOR_INCOME_EVENT,
+				events.NewCalculateVendorIncomeEventBody(customerTransaction),
+			),
+		)
 
 	}
 	if updateErr := paymentService.paymentRepo.UpdatePaymentStatus(payment); updateErr != nil {

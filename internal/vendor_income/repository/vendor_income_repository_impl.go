@@ -19,7 +19,7 @@ func NewVendorIncomeRepository(
 
 func (vendorIncomeRepo VendorIncomeRepository) CreateIncome(vendorIncome *vendorincomeentity.VendorIncome) error {
 	command := `
-		INSERT INTO _vendor_incomes (customer_id, order_amount, fee_amount, income_amount, order_item_id, transaction_id)
+		INSERT INTO _vendor_incomes (customer_id, order_amount, fee_amount, income_amount, order_item, transaction_id)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at, updated_at;
 	`

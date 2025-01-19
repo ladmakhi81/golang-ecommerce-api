@@ -17,6 +17,7 @@ import (
 	errorhandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/error_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/storage"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/validation"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/events"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/order"
 	orderrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/order/repository"
 	orderservice "github.com/ladmakhi81/golang-ecommerce-api/internal/order/service"
@@ -32,6 +33,9 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/user"
 	userrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/user/repository"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
+	vendorincomeevent "github.com/ladmakhi81/golang-ecommerce-api/internal/vendor_income/event"
+	vendorincomerepository "github.com/ladmakhi81/golang-ecommerce-api/internal/vendor_income/repository"
+	vendorincomeservice "github.com/ladmakhi81/golang-ecommerce-api/internal/vendor_income/service"
 	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
 	pkgzarinpalservice "github.com/ladmakhi81/golang-ecommerce-api/pkg/zarinpal/service"
 )
@@ -63,10 +67,7 @@ func main() {
 	apiRoute := server.Group("/api/v1")
 
 	// event container
-	// eventContainer := events.NewEventsContainer()
-
-	// publisher
-	// transactionEventsPublisher := transactionevent.NewTransactionEventsPublisher(&eventContainer)
+	eventContainer := events.NewEventsContainer()
 
 	// repositories
 	userRepo := userrepository.NewUserRepository(storage)
@@ -77,6 +78,7 @@ func main() {
 	orderRepo := orderrepository.NewOrderRepository(storage)
 	paymentRepo := paymentrepository.NewPaymentRepository(storage)
 	transactionRepo := transactionrepository.NewTransactionRepository(storage)
+	vendorIncomeRepo := vendorincomerepository.NewVendorIncomeRepository(storage)
 
 	// services
 	zarinpalService := pkgzarinpalservice.NewZarinpalService(mainConfig)
@@ -89,13 +91,16 @@ func main() {
 	productService := productservice.NewProductService(userService, categoryService, productRepo, emailService)
 	productPriceService := productservice.NewProductPriceService(productService, productPriceRepo)
 	cartService := cartservice.NewCartService(cartRepo, productService, productPriceService, userService)
-	paymentService := paymentservice.NewPaymentService(paymentRepo, zarinpalService, transactionService) // transactionEventsPublisher
-
+	paymentService := paymentservice.NewPaymentService(paymentRepo, zarinpalService, transactionService, &eventContainer)
 	orderService := orderservice.NewOrderService(userService, orderRepo, cartService, productService, paymentService)
+	vendorIncomeService := vendorincomeservice.NewVendorIncomeService(vendorIncomeRepo, orderService, transactionService)
 
-	// events
-	// transactionEvents := transactionevent.NewTransactionEventsContainer(&eventContainer, transactionService)
-	// transactionEvents.RegisterEvents()
+	// event subscribers
+	vendorIncomeEventSubscriber := vendorincomeevent.NewVendorIncomeEventsSubscriber(vendorIncomeService)
+
+	// event containers
+	vendorIncomeEventContainer := vendorincomeevent.NewVendorIncomeEventsContainer(&eventContainer, vendorIncomeEventSubscriber)
+	vendorIncomeEventContainer.RegisterEvents()
 
 	authRouter := auth.NewAuthRouter(apiRoute, authService)
 	authRouter.SetupRouter()

@@ -20,6 +20,11 @@ func NewVendorIncomeEventsSubscriber(
 }
 
 func (subscriber VendorIncomeEventsSubscriber) SubscribeCalculateVendorIncome(event events.Event) {
-	payload := event.Payload.(CalculateVendorIncomeEventBody)
-	fmt.Println(payload)
+	payload := event.Payload.(events.CalculateVendorIncomeEventBody)
+	err := subscriber.vendorIncomeService.CreateVendorIncome(
+		payload.Transaction,
+	)
+	if err != nil {
+		fmt.Println("vendor income fails", err)
+	}
 }
