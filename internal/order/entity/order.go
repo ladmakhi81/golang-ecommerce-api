@@ -8,11 +8,11 @@ import (
 )
 
 type Order struct {
-	Customer        *user_entity.User
-	Status          OrderStatus
-	FinalPrice      float32
-	StatusChangedAt time.Time
-	Items           []*OrderItem
+	Customer        *user_entity.User `json:"customer,omitempty"`
+	Status          OrderStatus       `json:"status,omitempty"`
+	FinalPrice      float32           `json:"finalPrice,omitempty"`
+	StatusChangedAt time.Time         `json:"statusChangedAt,omitempty"`
+	Items           []*OrderItem      `json:"items,omitempty"`
 
 	entity.BaseEntity
 }

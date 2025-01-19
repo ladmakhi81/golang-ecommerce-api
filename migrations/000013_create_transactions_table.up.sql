@@ -1,5 +1,3 @@
-CREATE TYPE transaction_type AS ENUM ('VendorIncome', 'Payment');
-
 CREATE TABLE IF NOT EXISTS _transactions (
     id BIGSERIAL PRIMARY KEY,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -9,6 +7,5 @@ CREATE TABLE IF NOT EXISTS _transactions (
     order_id INT NOT NULL REFERENCES _orders(id),
     authority VARCHAR(255) NOT NULL,
     ref_id INT NOT NULL,
-    amount DECIMAL NOT NULL,
-    type transaction_type NOT NULL
+    amount DECIMAL NOT NULL
 )

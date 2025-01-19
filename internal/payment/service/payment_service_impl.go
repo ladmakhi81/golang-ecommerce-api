@@ -10,7 +10,6 @@ import (
 	paymentdto "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/dto"
 	paymententity "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/entity"
 	paymentrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/repository"
-	transactionentity "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/entity"
 	transactionevent "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/event"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 	pkgzarinpalservice "github.com/ladmakhi81/golang-ecommerce-api/pkg/zarinpal/service"
@@ -105,7 +104,6 @@ func (paymentService PaymentService) VerifyPayment(customerId uint, reqBody paym
 			payment,
 			refId,
 			payment.Customer,
-			transactionentity.TransactionTypePayment,
 		)
 		if customerTransactionErr != nil {
 			return customerTransactionErr

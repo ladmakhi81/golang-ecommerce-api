@@ -22,19 +22,18 @@ func NewTransactionRepository(
 
 func (transactionRepo TransactionRepository) CreateTransaction(transaction *transactionentity.Transaction) error {
 	command := `
-		INSERT INTO _transactions(user_id, payment_id, order_id, authority, ref_id, amount, type)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO _transactions(user_id, payment_id, order_id, authority, ref_id, amount)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at, updated_at;
 	`
 	row := transactionRepo.storage.DB.QueryRow(
 		command,
-		transaction.User.ID,
+		transaction.Customer.ID,
 		transaction.Payment.ID,
 		transaction.Order.ID,
 		transaction.Authority,
 		transaction.RefID,
 		transaction.Amount,
-		transaction.Type,
 	)
 	scanErr := row.Scan(
 		&transaction.ID,
@@ -46,7 +45,7 @@ func (transactionRepo TransactionRepository) CreateTransaction(transaction *tran
 func (transactionRepo TransactionRepository) GetTransactionsPage(page, limit uint) ([]*transactionentity.Transaction, error) {
 	command := `
 		SELECT 
-		t.id, t.created_at, t.updated_at, t.authority, t.amount, t.type, t.ref_id,
+		t.id, t.created_at, t.updated_at, t.authority, t.amount, t.ref_id,
 		u.id, u.email, u.created_at, u.updated_at,
 		p.id, p.merchant_id, p.created_at, p.updated_at,
 		o.id, o.created_at, o.updated_at
@@ -64,12 +63,12 @@ func (transactionRepo TransactionRepository) GetTransactionsPage(page, limit uin
 	transactions := []*transactionentity.Transaction{}
 	for rows.Next() {
 		transaction := new(transactionentity.Transaction)
-		transaction.User = new(userentity.User)
+		transaction.Customer = new(userentity.User)
 		transaction.Payment = new(paymententity.Payment)
 		transaction.Order = new(orderentity.Order)
 		scanErr := rows.Scan(
-			&transaction.ID, &transaction.CreatedAt, &transaction.UpdatedAt, &transaction.Authority, &transaction.Amount, &transaction.Type, &transaction.ID,
-			&transaction.User.ID, &transaction.User.Email, &transaction.User.CreatedAt, &transaction.User.UpdatedAt,
+			&transaction.ID, &transaction.CreatedAt, &transaction.UpdatedAt, &transaction.Authority, &transaction.Amount, &transaction.RefID,
+			&transaction.Customer.ID, &transaction.Customer.Email, &transaction.Customer.CreatedAt, &transaction.Customer.UpdatedAt,
 			&transaction.Payment.ID, &transaction.Payment.MerchantID, &transaction.Payment.CreatedAt, &transaction.Payment.UpdatedAt,
 			&transaction.Order.ID, &transaction.Order.CreatedAt, &transaction.Order.UpdatedAt,
 		)

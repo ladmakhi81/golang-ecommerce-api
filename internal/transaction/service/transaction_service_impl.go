@@ -20,7 +20,7 @@ func NewTransactionService(
 	}
 }
 
-func (transactionService TransactionService) CreateTransaction(payment *paymententity.Payment, refId uint, user *userentity.User, transactionType transactionentity.TransactionType) (*transactionentity.Transaction, error) {
+func (transactionService TransactionService) CreateTransaction(payment *paymententity.Payment, refId uint, user *userentity.User) (*transactionentity.Transaction, error) {
 	transaction := transactionentity.NewTransaction(
 		user,
 		payment,
@@ -28,7 +28,6 @@ func (transactionService TransactionService) CreateTransaction(payment *paymente
 		payment.Authority,
 		refId,
 		payment.Amount,
-		transactionType,
 	)
 	if transactionErr := transactionService.transactionRepo.CreateTransaction(transaction); transactionErr != nil {
 		return nil, types.NewServerError(

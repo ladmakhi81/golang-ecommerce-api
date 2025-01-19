@@ -8,33 +8,29 @@ import (
 )
 
 type Transaction struct {
-	User      *user_entity.User       `json:"user,omitempty"`
+	Customer  *user_entity.User       `json:"customer,omitempty"`
 	Payment   *payment_entity.Payment `json:"payment,omitempty"`
 	Order     *order_entity.Order     `json:"order,omitempty"`
 	Authority string                  `json:"authority,omitempty"`
 	RefID     uint                    `json:"refId,omitempty"`
 	Amount    float32                 `json:"amount,omitempty"`
-	Type      TransactionType         `json:"type,omitempty"`
-
 	entity.BaseEntity
 }
 
 func NewTransaction(
-	user *user_entity.User,
+	customer *user_entity.User,
 	payment *payment_entity.Payment,
 	order *order_entity.Order,
 	authority string,
 	refID uint,
 	amount float32,
-	transactionType TransactionType,
 ) *Transaction {
 	return &Transaction{
-		User:      user,
+		Customer:  customer,
 		Payment:   payment,
 		Order:     order,
 		Authority: authority,
 		RefID:     refID,
 		Amount:    amount,
-		Type:      transactionType,
 	}
 }
