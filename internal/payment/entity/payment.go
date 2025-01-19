@@ -9,13 +9,13 @@ import (
 )
 
 type Payment struct {
-	Customer        *user_entity.User   `json:"customer"`
-	Status          PaymentStatus       `json:"status"`
-	StatusChangedAt time.Time           `json:"statusChangedAt"`
-	Order           *order_entity.Order `json:"order"`
-	Amount          float32             `json:"amount"`
-	Authority       string              `json:"authority"`
-	MerchantID      string              `json:"merchant_id"`
+	Customer        *user_entity.User   `json:"customer,omitempty"`
+	Status          PaymentStatus       `json:"status,omitempty"`
+	StatusChangedAt time.Time           `json:"statusChangedAt,omitempty"`
+	Order           *order_entity.Order `json:"order,omitempty"`
+	Amount          float32             `json:"amount,omitempty"`
+	Authority       string              `json:"authority,omitempty"`
+	MerchantID      string              `json:"merchant_id,omitempty"`
 
 	entity.BaseEntity
 }

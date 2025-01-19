@@ -7,4 +7,5 @@ import (
 
 type ITransactionService interface {
 	CreatePaymentTransaction(payment *paymententity.Payment, refId uint) (*transactionentity.Transaction, error)
+	GetTransactionsPage(page, limit uint) ([]*transactionentity.Transaction, error)
 }

@@ -26,6 +26,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/product"
 	productrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/product/repository"
 	productservice "github.com/ladmakhi81/golang-ecommerce-api/internal/product/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/transaction"
 	transactionrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/repository"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/user"
@@ -105,6 +106,9 @@ func main() {
 
 	paymentRouter := payment.NewPaymentRouter(apiRoute, mainConfig, paymentService)
 	paymentRouter.SetupRouter()
+
+	transactionRouter := transaction.NewTransactionRouter(apiRoute, mainConfig, transactionService)
+	transactionRouter.Setup()
 
 	log.Println("the server is running")
 

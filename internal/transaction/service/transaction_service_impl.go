@@ -38,3 +38,14 @@ func (transactionService TransactionService) CreatePaymentTransaction(payment *p
 	}
 	return transaction, nil
 }
+func (transactionService TransactionService) GetTransactionsPage(page, limit uint) ([]*transactionentity.Transaction, error) {
+	transactions, transactionsErr := transactionService.transactionRepo.GetTransactionsPage(page, limit)
+	if transactionsErr != nil {
+		return nil, types.NewServerError(
+			"error in finding transactions page",
+			"TransactionService.GetTransactionsPage",
+			transactionsErr,
+		)
+	}
+	return transactions, nil
+}

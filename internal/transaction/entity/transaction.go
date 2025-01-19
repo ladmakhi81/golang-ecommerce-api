@@ -8,13 +8,13 @@ import (
 )
 
 type Transaction struct {
-	User      *user_entity.User       `json:"user"`
-	Payment   *payment_entity.Payment `json:"payment"`
-	Order     *order_entity.Order     `json:"order"`
-	Authority string                  `json:"authority"`
-	RefID     uint                    `json:"refId"`
-	Amount    float32                 `json:"amount"`
-	Type      TransactionType         `json:"type"`
+	User      *user_entity.User       `json:"user,omitempty"`
+	Payment   *payment_entity.Payment `json:"payment,omitempty"`
+	Order     *order_entity.Order     `json:"order,omitempty"`
+	Authority string                  `json:"authority,omitempty"`
+	RefID     uint                    `json:"refId,omitempty"`
+	Amount    float32                 `json:"amount,omitempty"`
+	Type      TransactionType         `json:"type,omitempty"`
 
 	entity.BaseEntity
 }
