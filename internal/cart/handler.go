@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	cartdto "github.com/ladmakhi81/golang-ecommerce-api/internal/cart/dto"
 	cartservice "github.com/ladmakhi81/golang-ecommerce-api/internal/cart/service"
+	responsehandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/response_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 )
@@ -37,7 +38,11 @@ func (cartHandler CartHandler) AddProductToCart(c echo.Context) error {
 	if cartErr != nil {
 		return cartErr
 	}
-	c.JSON(http.StatusCreated, map[string]any{"cart": cart})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		cart,
+	)
 	return nil
 }
 func (cartHandler CartHandler) DeleteUserCart(c echo.Context) error {
@@ -53,7 +58,11 @@ func (cartHandler CartHandler) DeleteUserCart(c echo.Context) error {
 	if deleteErr != nil {
 		return deleteErr
 	}
-	c.JSON(http.StatusOK, map[string]any{"message": "delete successfully"})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		nil,
+	)
 	return nil
 }
 func (cartHandler CartHandler) UpdateCartQuantity(c echo.Context) error {
@@ -75,7 +84,11 @@ func (cartHandler CartHandler) UpdateCartQuantity(c echo.Context) error {
 	if updateErr := cartHandler.cartService.UpdateCartQuantityById(customerId, cartId, reqBody); updateErr != nil {
 		return updateErr
 	}
-	c.JSON(http.StatusOK, map[string]any{"message": "update successfully"})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		nil,
+	)
 	return nil
 }
 func (cartHandler CartHandler) GetUserCarts(c echo.Context) error {
@@ -84,6 +97,10 @@ func (cartHandler CartHandler) GetUserCarts(c echo.Context) error {
 	if cartsErr != nil {
 		return cartsErr
 	}
-	c.JSON(http.StatusOK, map[string]any{"data": carts})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		carts,
+	)
 	return nil
 }
