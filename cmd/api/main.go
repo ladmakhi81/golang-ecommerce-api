@@ -80,6 +80,7 @@ func main() {
 	paymentRepo := paymentrepository.NewPaymentRepository(storage)
 	transactionRepo := transactionrepository.NewTransactionRepository(storage)
 	vendorIncomeRepo := vendorincomerepository.NewVendorIncomeRepository(storage)
+	userAddressRepo := userrepository.NewUserAddressRepository(storage)
 
 	// services
 	zarinpalService := pkgzarinpalservice.NewZarinpalService(mainConfig)
@@ -95,6 +96,7 @@ func main() {
 	paymentService := paymentservice.NewPaymentService(paymentRepo, zarinpalService, transactionService, &eventContainer)
 	orderService := orderservice.NewOrderService(userService, orderRepo, cartService, productService, paymentService, emailService)
 	vendorIncomeService := vendorincomeservice.NewVendorIncomeService(vendorIncomeRepo, orderService, transactionService)
+	userAddressService := userservice.NewUserAddressService(userAddressRepo, userService)
 
 	// event subscribers
 	vendorIncomeEventSubscriber := vendorincomeevent.NewVendorIncomeEventsSubscriber(vendorIncomeService)
@@ -110,7 +112,7 @@ func main() {
 	authRouter := auth.NewAuthRouter(apiRoute, authService)
 	authRouter.SetupRouter()
 
-	usersRouter := user.NewUserRouter(apiRoute, userService, mainConfig)
+	usersRouter := user.NewUserRouter(apiRoute, userService, userAddressService, mainConfig)
 	usersRouter.SetupRouter()
 
 	categoryRouter := category.NewCategoryRouter(apiRoute, mainConfig, categoryService)

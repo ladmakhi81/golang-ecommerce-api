@@ -16,31 +16,42 @@ type UserRouter struct {
 func NewUserRouter(
 	apiRouter *echo.Group,
 	userService userservice.IUserService,
+	userAddressService userservice.IUserAddressService,
 	config config.MainConfig,
 ) UserRouter {
 	return UserRouter{
 		config:      config,
 		apiRouter:   apiRouter,
-		userHandler: NewUserHandler(userService),
+		userHandler: NewUserHandler(userService, userAddressService),
 	}
 }
 
 func (userRouter UserRouter) SetupRouter() {
-	usersRouter := userRouter.apiRouter.Group("/users")
+	usersApi := userRouter.apiRouter.Group("/users")
 
-	usersRouter.PATCH(
-		"/verify-account/:id",
-		userRouter.userHandler.VerifyAccountByAdmin,
+	usersApi.Use(
 		middlewares.AuthMiddleware(
 			userRouter.config.SecretKey,
 		),
 	)
 
-	usersRouter.PATCH(
+	usersApi.PATCH(
+		"/verify-account/:id",
+		userRouter.userHandler.VerifyAccountByAdmin,
+	)
+
+	usersApi.PATCH(
 		"/complete-profile",
 		userRouter.userHandler.CompleteProfile,
-		middlewares.AuthMiddleware(
-			userRouter.config.SecretKey,
-		),
+	)
+
+	usersApi.POST(
+		"/address",
+		userRouter.userHandler.CreateUserAddress,
+	)
+
+	usersApi.GET(
+		"/addresses",
+		userRouter.userHandler.GetUserAddresses,
 	)
 }

@@ -9,8 +9,9 @@ import (
 type User struct {
 	Role UserRole `json:"role,omitempty"`
 
-	Email    string `json:"email,omitempty"`
-	Password string `json:"-"`
+	Email         string       `json:"email,omitempty"`
+	Password      string       `json:"-"`
+	ActiveAddress *UserAddress `json:"ActiveAddress,omitempty"`
 
 	// vendor
 	FullName          string    `json:"fullName,omitempty"`
