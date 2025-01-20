@@ -72,14 +72,19 @@ func (orderHandler OrderHandler) UpdateOrderStatus(c echo.Context) error {
 }
 func (orderHandler OrderHandler) FindOrdersPage(c echo.Context) error {
 	pagination := orderHandler.util.PaginationExtractor(c)
-	orders, ordersErr := orderHandler.orderService.FindOrdersPage(pagination.Page, pagination.Limit)
+	orders, ordersCount, ordersErr := orderHandler.orderService.FindOrdersPage(pagination.Page, pagination.Limit)
 	if ordersErr != nil {
 		return ordersErr
 	}
+	paginatedResponse := types.NewPaginationResponse(
+		ordersCount,
+		pagination,
+		orders,
+	)
 	responsehandling.ResponseJSON(
 		c,
 		http.StatusOK,
-		orders,
+		paginatedResponse,
 	)
 	return nil
 }

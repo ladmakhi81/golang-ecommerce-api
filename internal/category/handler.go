@@ -58,14 +58,19 @@ func (categoryHandler CategoryHandler) GetCategoriesTree(c echo.Context) error {
 }
 func (categoryHandler CategoryHandler) GetCategoriesPage(c echo.Context) error {
 	pagination := categoryHandler.util.PaginationExtractor(c)
-	categories, categoriesErr := categoryHandler.categoryService.FindCategoriesPage(pagination.Page, pagination.Limit)
+	categories, categoriesCount, categoriesErr := categoryHandler.categoryService.FindCategoriesPage(pagination.Page, pagination.Limit)
 	if categoriesErr != nil {
 		return categoriesErr
 	}
+	paginatedResponse := types.NewPaginationResponse(
+		categoriesCount,
+		pagination,
+		categories,
+	)
 	responsehandling.ResponseJSON(
 		c,
 		http.StatusOK,
-		categories,
+		paginatedResponse,
 	)
 	return nil
 }

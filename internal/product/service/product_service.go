@@ -11,7 +11,7 @@ type IProductService interface {
 	CreateProduct(reqBody productdto.CreateProductReqBody, vendorID uint) (*productentity.Product, error)
 	ConfirmProductByAdmin(adminId uint, productId uint, fee float32) error
 	FindProductById(id uint) (*productentity.Product, error)
-	GetProductsPage(page, limit uint) ([]*productentity.Product, error)
+	GetProductsPage(page, limit uint) ([]*productentity.Product, uint, error)
 	DeleteProductById(productId, userId uint) error
 	UploadProductImages(productId uint, ownerId uint, multipartForms *multipart.Form) ([]string, error)
 }

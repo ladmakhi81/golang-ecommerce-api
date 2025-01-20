@@ -119,3 +119,15 @@ func (paymentRepo PaymentRepository) GetPaymentsPage(page, limit uint) ([]*payme
 	}
 	return payments, nil
 }
+func (paymentRepo PaymentRepository) GetPaymentsCount() (uint, error) {
+	command := `
+		SELECT COUNT(*) FROM _payments;
+	`
+	row := paymentRepo.storage.DB.QueryRow(command)
+	count := uint(0)
+	scanErr := row.Scan(&count)
+	if scanErr != nil {
+		return 0, scanErr
+	}
+	return count, nil
+}

@@ -94,16 +94,24 @@ func (categoryService CategoryService) FindCategoriesTree() ([]*categoryentity.C
 	}
 	return categories, nil
 }
-func (categoryService CategoryService) FindCategoriesPage(page, limit uint) ([]*categoryentity.Category, error) {
+func (categoryService CategoryService) FindCategoriesPage(page, limit uint) ([]*categoryentity.Category, uint, error) {
 	categories, categoriesErr := categoryService.categoryRepo.FindCategoriesPage(page, limit)
 	if categoriesErr != nil {
-		return nil, types.NewServerError(
+		return nil, 0, types.NewServerError(
 			"error in finding categories page",
 			"CategoryService.FindCategoriesPage",
 			categoriesErr,
 		)
 	}
-	return categories, nil
+	categoriesCount, categoriesCountErr := categoryService.categoryRepo.GetCategoriesCount()
+	if categoriesCountErr != nil {
+		return nil, 0, types.NewServerError(
+			"error in get count of categories",
+			"CategoryService.FindCategoriesPage.GetCategoriesCount",
+			categoriesCountErr,
+		)
+	}
+	return categories, categoriesCount, nil
 }
 func (categoryService CategoryService) DeleteCategoryById(id uint) error {
 	if _, err := categoryService.FindCategoryById(id); err != nil {

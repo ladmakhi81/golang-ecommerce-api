@@ -7,5 +7,6 @@ type IProductRepository interface {
 	UpdateProductById(product *productentity.Product) error
 	FindProductById(id uint) (*productentity.Product, error)
 	FindProductsPage(page, limit uint) ([]*productentity.Product, error)
+	GetProductsCount() (uint, error)
 	DeleteProductById(id uint) error
 }

@@ -46,17 +46,22 @@ func (paymentHandler PaymentHandler) VerifyPayment(c echo.Context) error {
 }
 func (paymentHandler PaymentHandler) GetPaymentsPage(c echo.Context) error {
 	pagination := paymentHandler.util.PaginationExtractor(c)
-	payments, paymentsErr := paymentHandler.paymentService.GetPaymentsPage(
+	payments, paymentsCount, paymentsErr := paymentHandler.paymentService.GetPaymentsPage(
 		pagination.Page,
 		pagination.Limit,
 	)
 	if paymentsErr != nil {
 		return paymentsErr
 	}
+	paginatedResponse := types.NewPaginationResponse(
+		paymentsCount,
+		pagination,
+		payments,
+	)
 	responsehandling.ResponseJSON(
 		c,
 		http.StatusOK,
-		payments,
+		paginatedResponse,
 	)
 	return nil
 }

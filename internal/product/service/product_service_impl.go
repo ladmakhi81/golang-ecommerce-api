@@ -142,16 +142,24 @@ func (productService ProductService) FindProductById(id uint) (*productentity.Pr
 	}
 	return product, nil
 }
-func (productService ProductService) GetProductsPage(page, limit uint) ([]*productentity.Product, error) {
+func (productService ProductService) GetProductsPage(page, limit uint) ([]*productentity.Product, uint, error) {
 	products, productsErr := productService.productRepo.FindProductsPage(page, limit)
 	if productsErr != nil {
-		return nil, types.NewServerError(
+		return nil, 0, types.NewServerError(
 			"error in returning products",
 			"ProductService.GetProductsPage.FindProductsPage",
 			productsErr,
 		)
 	}
-	return products, nil
+	productsCount, productsCountErr := productService.productRepo.GetProductsCount()
+	if productsCountErr != nil {
+		return nil, 0, types.NewServerError(
+			"error in get count of products",
+			"ProductService.GetProductsPage.GetProductsCount",
+			productsCountErr,
+		)
+	}
+	return products, productsCount, nil
 }
 func (productService ProductService) DeleteProductById(productId, userId uint) error {
 	product, productErr := productService.FindProductById(productId)

@@ -150,6 +150,18 @@ func (categoryRepo CategoryRepository) SetCategoryIcon(categoryId uint, filename
 	row := categoryRepo.storage.DB.QueryRow(command, filename, categoryId)
 	return row.Err()
 }
+func (categoryRepo CategoryRepository) GetCategoriesCount() (uint, error) {
+	command := `
+		SELECT count(*) FROM _categories;
+	`
+	count := uint(0)
+	row := categoryRepo.storage.DB.QueryRow(command)
+	scanErr := row.Scan(&count)
+	if scanErr != nil {
+		return 0, scanErr
+	}
+	return count, nil
+}
 
 func buildNestedDataFromCategories(categories []*categoryentity.Category, parentCategoryID *uint) []*categoryentity.Category {
 	result := []*categoryentity.Category{}

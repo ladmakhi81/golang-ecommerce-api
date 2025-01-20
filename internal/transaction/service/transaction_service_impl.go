@@ -38,16 +38,24 @@ func (transactionService TransactionService) CreateTransaction(payment *paymente
 	}
 	return transaction, nil
 }
-func (transactionService TransactionService) GetTransactionsPage(page, limit uint) ([]*transactionentity.Transaction, error) {
+func (transactionService TransactionService) GetTransactionsPage(page, limit uint) ([]*transactionentity.Transaction, uint, error) {
 	transactions, transactionsErr := transactionService.transactionRepo.GetTransactionsPage(page, limit)
 	if transactionsErr != nil {
-		return nil, types.NewServerError(
+		return nil, 0, types.NewServerError(
 			"error in finding transactions page",
 			"TransactionService.GetTransactionsPage",
 			transactionsErr,
 		)
 	}
-	return transactions, nil
+	transactionCount, transactionCountErr := transactionService.transactionRepo.GetTransactionsCount()
+	if transactionCountErr != nil {
+		return nil, 0, types.NewServerError(
+			"error in get count of transactions",
+			"TransactionService.GetTransactionsPage.GetTransactionCount",
+			transactionCountErr,
+		)
+	}
+	return transactions, transactionCount, nil
 }
 func (transactionService TransactionService) GetOrderIdOfTransaction(transactionId uint) (*uint, error) {
 	orderId, orderIdErr := transactionService.transactionRepo.GetOrderIdOfTransaction(transactionId)

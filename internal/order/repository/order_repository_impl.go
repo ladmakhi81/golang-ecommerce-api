@@ -184,3 +184,15 @@ func (orderRepo OrderRepository) FindOrdersPage(page, limit uint) ([]*orderentit
 	}
 	return orders, nil
 }
+func (orderRepo OrderRepository) GetOrdersCount() (uint, error) {
+	command := `
+		SELECT count(*) FROM _orders;
+	`
+	row := orderRepo.storage.DB.QueryRow(command)
+	count := uint(0)
+	scanErr := row.Scan(&count)
+	if scanErr != nil {
+		return 0, scanErr
+	}
+	return count, nil
+}

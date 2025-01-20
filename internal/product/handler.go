@@ -92,14 +92,19 @@ func (productHandler ProductHandler) FindProductDetailById(c echo.Context) error
 }
 func (productHandler ProductHandler) GetProductsPage(c echo.Context) error {
 	pagination := productHandler.util.PaginationExtractor(c)
-	products, productsErr := productHandler.productService.GetProductsPage(pagination.Page, pagination.Limit)
+	products, productsCount, productsErr := productHandler.productService.GetProductsPage(pagination.Page, pagination.Limit)
 	if productsErr != nil {
 		return productsErr
 	}
+	paginatedResponse := types.NewPaginationResponse(
+		productsCount,
+		pagination,
+		products,
+	)
 	responsehandling.ResponseJSON(
 		c,
 		http.StatusOK,
-		products,
+		paginatedResponse,
 	)
 	return nil
 }

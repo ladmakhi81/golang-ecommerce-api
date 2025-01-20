@@ -8,6 +8,6 @@ import (
 
 type ITransactionService interface {
 	CreateTransaction(payment *paymententity.Payment, refId uint, user *userentity.User) (*transactionentity.Transaction, error)
-	GetTransactionsPage(page, limit uint) ([]*transactionentity.Transaction, error)
+	GetTransactionsPage(page, limit uint) ([]*transactionentity.Transaction, uint, error)
 	GetOrderIdOfTransaction(transactionId uint) (*uint, error)
 }

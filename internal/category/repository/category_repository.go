@@ -8,6 +8,7 @@ type ICategoryRepository interface {
 	CreateCategory(category *categoryentity.Category) error
 	FindCategoriesTree() ([]*categoryentity.Category, error)
 	FindCategoriesPage(page, limit uint) ([]*categoryentity.Category, error)
+	GetCategoriesCount() (uint, error)
 	DeleteCategoryById(id uint) error
 	SetCategoryIcon(categoryId uint, filename string) error
 }

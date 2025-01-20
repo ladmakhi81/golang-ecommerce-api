@@ -6,4 +6,5 @@ type ITransactionRepository interface {
 	CreateTransaction(transaction *transactionentity.Transaction) error
 	GetTransactionsPage(page, limit uint) ([]*transactionentity.Transaction, error)
 	GetOrderIdOfTransaction(transactionId uint) (*uint, error)
+	GetTransactionsCount() (uint, error)
 }

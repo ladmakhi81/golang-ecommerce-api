@@ -247,3 +247,15 @@ func (productRepo ProductRepository) DeleteProductById(id uint) error {
 	row := productRepo.storage.DB.QueryRow(command, id)
 	return row.Err()
 }
+func (productRepo ProductRepository) GetProductsCount() (uint, error) {
+	command := `
+		SELECT COUNT(*) FROM _products
+	`
+	row := productRepo.storage.DB.QueryRow(command)
+	count := uint(0)
+	scanErr := row.Scan(&count)
+	if scanErr != nil {
+		return 0, scanErr
+	}
+	return count, nil
+}

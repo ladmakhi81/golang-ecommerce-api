@@ -100,3 +100,15 @@ func (transactionRepo TransactionRepository) GetOrderIdOfTransaction(transaction
 	}
 	return orderID, nil
 }
+func (transactionRepo TransactionRepository) GetTransactionsCount() (uint, error) {
+	command := `
+		SELECT COUNT(*) FROM _transactions;
+	`
+	row := transactionRepo.storage.DB.QueryRow(command)
+	count := uint(0)
+	scanErr := row.Scan(&count)
+	if scanErr != nil {
+		return 0, scanErr
+	}
+	return count, nil
+}

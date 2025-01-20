@@ -7,4 +7,5 @@ type IPaymentRepository interface {
 	FindPaymentByAuthority(authority string) (*paymententity.Payment, error)
 	UpdatePaymentStatus(payment *paymententity.Payment) error
 	GetPaymentsPage(page, limit uint) ([]*paymententity.Payment, error)
+	GetPaymentsCount() (uint, error)
 }

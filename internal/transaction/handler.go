@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	responsehandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/response_handling"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 )
@@ -25,14 +26,19 @@ func NewTransactionHandler(
 
 func (transactionHandler TransactionHandler) GetTransactionsPage(c echo.Context) error {
 	pagination := transactionHandler.util.PaginationExtractor(c)
-	transactions, err := transactionHandler.transactionService.GetTransactionsPage(pagination.Page, pagination.Limit)
+	transactions, transactionCount, err := transactionHandler.transactionService.GetTransactionsPage(pagination.Page, pagination.Limit)
 	if err != nil {
 		return err
 	}
+	paginatedResponse := types.NewPaginationResponse(
+		transactionCount,
+		pagination,
+		transactions,
+	)
 	responsehandling.ResponseJSON(
 		c,
 		http.StatusOK,
-		transactions,
+		paginatedResponse,
 	)
 	return nil
 }
