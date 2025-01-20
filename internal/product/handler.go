@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	responsehandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/response_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 	productdto "github.com/ladmakhi81/golang-ecommerce-api/internal/product/dto"
@@ -43,10 +44,11 @@ func (productHandler ProductHandler) CreateProduct(c echo.Context) error {
 	if productErr != nil {
 		return productErr
 	}
-	c.JSON(http.StatusCreated, map[string]any{
-		"product":   product,
-		"isSuccess": true,
-	})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusCreated,
+		product,
+	)
 	return nil
 }
 func (productHandler ProductHandler) ConfirmProductByAdmin(c echo.Context) error {
@@ -65,6 +67,11 @@ func (productHandler ProductHandler) ConfirmProductByAdmin(c echo.Context) error
 	if confirmErr := productHandler.productService.ConfirmProductByAdmin(adminId, productId, reqBody.Fee); confirmErr != nil {
 		return confirmErr
 	}
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		nil,
+	)
 	return nil
 }
 func (productHandler ProductHandler) FindProductDetailById(c echo.Context) error {
@@ -76,10 +83,11 @@ func (productHandler ProductHandler) FindProductDetailById(c echo.Context) error
 	if productErr != nil {
 		return productErr
 	}
-	c.JSON(http.StatusOK, map[string]any{
-		"success": true,
-		"data":    product,
-	})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		product,
+	)
 	return nil
 }
 func (productHandler ProductHandler) GetProductsPage(c echo.Context) error {
@@ -88,10 +96,11 @@ func (productHandler ProductHandler) GetProductsPage(c echo.Context) error {
 	if productsErr != nil {
 		return productsErr
 	}
-	c.JSON(http.StatusOK, map[string]any{
-		"success": true,
-		"data":    products,
-	})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		products,
+	)
 	return nil
 }
 func (productHandler ProductHandler) DeleteProductById(c echo.Context) error {
@@ -104,10 +113,11 @@ func (productHandler ProductHandler) DeleteProductById(c echo.Context) error {
 	if deleteErr != nil {
 		return deleteErr
 	}
-	c.JSON(http.StatusOK, map[string]any{
-		"success": true,
-		"message": "delete successfully ...",
-	})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		nil,
+	)
 	return nil
 }
 func (productHandler ProductHandler) AddPriceToProductPriceList(c echo.Context) error {
@@ -127,10 +137,11 @@ func (productHandler ProductHandler) AddPriceToProductPriceList(c echo.Context) 
 	if priceItemErr != nil {
 		return priceItemErr
 	}
-	c.JSON(http.StatusCreated, map[string]any{
-		"success": true,
-		"data":    priceItem,
-	})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusCreated,
+		priceItem,
+	)
 	return nil
 }
 func (productHandler ProductHandler) DeletePriceItem(c echo.Context) error {
@@ -144,6 +155,11 @@ func (productHandler ProductHandler) DeletePriceItem(c echo.Context) error {
 	if removeErr := productHandler.productPriceService.RemovePriceItemFromProductList(itemId); removeErr != nil {
 		return removeErr
 	}
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		nil,
+	)
 	return nil
 }
 func (productHandler ProductHandler) GetPricesOfProduct(c echo.Context) error {
@@ -155,7 +171,11 @@ func (productHandler ProductHandler) GetPricesOfProduct(c echo.Context) error {
 	if pricesErr != nil {
 		return pricesErr
 	}
-	c.JSON(http.StatusOK, map[string]any{"prices": prices})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		prices,
+	)
 	return nil
 }
 func (productHandler ProductHandler) UploadProductImages(c echo.Context) error {
@@ -176,6 +196,10 @@ func (productHandler ProductHandler) UploadProductImages(c echo.Context) error {
 	if uploadErr != nil {
 		return uploadErr
 	}
-	c.JSON(http.StatusOK, map[string]any{"success": true, "data": uploadedFileNames})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		uploadedFileNames,
+	)
 	return nil
 }
