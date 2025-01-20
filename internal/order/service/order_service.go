@@ -10,4 +10,5 @@ type IOrderService interface {
 	FindOrderItemsByOrderId(orderId uint) ([]*orderentity.OrderItem, error)
 	ChangeOrderStatus(orderId uint, reqBody orderdto.ChangeOrderStatusReqBody) error
 	FindOrderById(id uint) (*orderentity.Order, error)
+	FindOrdersPage(page, limit uint) ([]*orderentity.Order, error)
 }

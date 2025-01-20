@@ -61,3 +61,12 @@ func (orderHandler OrderHandler) UpdateOrderStatus(c echo.Context) error {
 	c.JSON(http.StatusOK, map[string]any{"message": "update successfully"})
 	return nil
 }
+func (orderHandler OrderHandler) FindOrdersPage(c echo.Context) error {
+	pagination := orderHandler.util.PaginationExtractor(c)
+	orders, ordersErr := orderHandler.orderService.FindOrdersPage(pagination.Page, pagination.Limit)
+	if ordersErr != nil {
+		return ordersErr
+	}
+	c.JSON(http.StatusOK, map[string]any{"message": "success", "data": orders})
+	return nil
+}

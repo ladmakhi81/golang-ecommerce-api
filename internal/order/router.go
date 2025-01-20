@@ -42,4 +42,9 @@ func (orderRouter OrderRouter) SetupRouter() {
 		"/:orderId",
 		orderRouter.orderHandler.UpdateOrderStatus,
 	)
+
+	orderApi.GET(
+		"/page",
+		orderRouter.orderHandler.FindOrdersPage,
+	)
 }

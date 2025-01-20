@@ -145,3 +145,42 @@ func (orderRepo OrderRepository) FindOrderById(id uint) (*orderentity.Order, err
 	}
 	return order, nil
 }
+func (orderRepo OrderRepository) FindOrdersPage(page, limit uint) ([]*orderentity.Order, error) {
+	command := `
+		SELECT
+		o.id, o.created_at, o.updated_at, o.status, o.final_price, o.status_changed_at,
+		u.id, u.email, u.created_at, u.updated_at,
+		a.id, a.city, a.province, a.address, a.license_plate, a.description, a.created_at, a.updated_at
+		FROM _orders o
+		INNER JOIN _users u ON o.customer_id = u.id
+		INNER JOIN _user_addresses a ON a.id = o.address_id
+		ORDER BY o.id DESC
+		LIMIT $1 OFFSET $2;
+	`
+	rows, rowsErr := orderRepo.storage.DB.Query(command, limit, page)
+	if rowsErr != nil {
+		return nil, rowsErr
+	}
+	defer rows.Close()
+	orders := []*orderentity.Order{}
+	for rows.Next() {
+		order := new(orderentity.Order)
+		order.Customer = new(userentity.User)
+		order.Address = new(userentity.UserAddress)
+		scanErr := rows.Scan(
+			&order.ID, &order.CreatedAt, &order.UpdatedAt, &order.Status, &order.FinalPrice, &order.StatusChangedAt,
+			&order.Customer.ID, &order.Customer.Email, &order.Customer.CreatedAt, &order.Customer.UpdatedAt,
+			&order.Address.ID, &order.Address.City, &order.Address.Province, &order.Address.Address, &order.Address.LicensePlate, &order.Address.Description, &order.Address.CreatedAt, &order.Address.UpdatedAt,
+		)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		items, itemsErr := orderRepo.FindOrderItemsByOrderId(order.ID)
+		if itemsErr != nil {
+			return nil, itemsErr
+		}
+		order.Items = items
+		orders = append(orders, order)
+	}
+	return orders, nil
+}

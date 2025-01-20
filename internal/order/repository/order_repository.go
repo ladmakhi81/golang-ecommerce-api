@@ -8,4 +8,5 @@ type IOrderRepository interface {
 	FindOrderItemsByOrderId(orderId uint) ([]*orderentity.OrderItem, error)
 	ChanegOrderStatus(order *orderentity.Order) error
 	FindOrderById(id uint) (*orderentity.Order, error)
+	FindOrdersPage(page, limit uint) ([]*orderentity.Order, error)
 }

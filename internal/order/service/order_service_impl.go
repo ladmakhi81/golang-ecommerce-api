@@ -172,3 +172,14 @@ func (orderService OrderService) ChangeOrderStatus(orderId uint, reqBody orderdt
 	)
 	return nil
 }
+func (orderService OrderService) FindOrdersPage(page, limit uint) ([]*orderentity.Order, error) {
+	orders, ordersErr := orderService.orderRepo.FindOrdersPage(page, limit)
+	if ordersErr != nil {
+		return nil, types.NewServerError(
+			"error in finding orders page",
+			"OrderService.FindOrdersPage",
+			ordersErr,
+		)
+	}
+	return orders, nil
+}
