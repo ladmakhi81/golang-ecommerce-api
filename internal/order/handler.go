@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	responsehandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/response_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 	orderdto "github.com/ladmakhi81/golang-ecommerce-api/internal/order/dto"
@@ -33,11 +34,15 @@ func (orderHandler OrderHandler) CreateOrder(c echo.Context) error {
 		return err
 	}
 	customerId := c.Get("AuthClaim").(*types.AuthClaim).ID
-	orderRes, orderErr := orderHandler.orderService.SubmitOrder(customerId, reqBody)
+	createdOrder, orderErr := orderHandler.orderService.SubmitOrder(customerId, reqBody)
 	if orderErr != nil {
 		return orderErr
 	}
-	c.JSON(http.StatusCreated, map[string]any{"data": orderRes})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusCreated,
+		createdOrder,
+	)
 	return nil
 }
 func (orderHandler OrderHandler) UpdateOrderStatus(c echo.Context) error {
@@ -58,7 +63,11 @@ func (orderHandler OrderHandler) UpdateOrderStatus(c echo.Context) error {
 	if err := orderHandler.orderService.ChangeOrderStatus(orderId, reqBody); err != nil {
 		return err
 	}
-	c.JSON(http.StatusOK, map[string]any{"message": "update successfully"})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		nil,
+	)
 	return nil
 }
 func (orderHandler OrderHandler) FindOrdersPage(c echo.Context) error {
@@ -67,6 +76,10 @@ func (orderHandler OrderHandler) FindOrdersPage(c echo.Context) error {
 	if ordersErr != nil {
 		return ordersErr
 	}
-	c.JSON(http.StatusOK, map[string]any{"message": "success", "data": orders})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		orders,
+	)
 	return nil
 }

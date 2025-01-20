@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	responsehandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/response_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 	paymentdto "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/dto"
@@ -36,6 +37,11 @@ func (paymentHandler PaymentHandler) VerifyPayment(c echo.Context) error {
 	if verifyErr := paymentHandler.paymentService.VerifyPayment(customerId, reqBody); verifyErr != nil {
 		return verifyErr
 	}
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		nil,
+	)
 	return nil
 }
 func (paymentHandler PaymentHandler) GetPaymentsPage(c echo.Context) error {
@@ -47,6 +53,10 @@ func (paymentHandler PaymentHandler) GetPaymentsPage(c echo.Context) error {
 	if paymentsErr != nil {
 		return paymentsErr
 	}
-	c.JSON(http.StatusOK, map[string]any{"data": payments})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		payments,
+	)
 	return nil
 }

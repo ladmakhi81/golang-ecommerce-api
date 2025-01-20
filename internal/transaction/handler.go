@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	responsehandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/response_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 )
@@ -28,6 +29,10 @@ func (transactionHandler TransactionHandler) GetTransactionsPage(c echo.Context)
 	if err != nil {
 		return err
 	}
-	c.JSON(http.StatusOK, map[string]any{"data": transactions})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		transactions,
+	)
 	return nil
 }
