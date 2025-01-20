@@ -5,6 +5,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
+	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
 type TransactionRouter struct {
@@ -38,5 +39,6 @@ func (transactionRouter TransactionRouter) Setup() {
 	transactionApi.GET(
 		"/page",
 		transactionRouter.transactionHandler.GetTransactionsPage,
+		middlewares.RoleMiddleware(userentity.AdminRole),
 	)
 }

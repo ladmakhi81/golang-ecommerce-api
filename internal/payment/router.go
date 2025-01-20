@@ -5,6 +5,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	paymentservice "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/service"
+	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
 type PaymentRouter struct {
@@ -40,5 +41,6 @@ func (paymentRouter PaymentRouter) SetupRouter() {
 	paymentsApi.GET(
 		"/page",
 		paymentRouter.paymentHandler.GetPaymentsPage,
+		middlewares.RoleMiddleware(userentity.AdminRole),
 	)
 }

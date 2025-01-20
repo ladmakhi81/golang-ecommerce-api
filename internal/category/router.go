@@ -5,6 +5,7 @@ import (
 	categoryservice "github.com/ladmakhi81/golang-ecommerce-api/internal/category/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
+	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
 type CategoryRouter struct {
@@ -37,6 +38,7 @@ func (categoryRouter CategoryRouter) SetupRouter() {
 	categoriesApi.POST(
 		"",
 		categoryRouter.categoryHandler.CreateCategory,
+		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 	categoriesApi.GET(
 		"",
@@ -49,9 +51,11 @@ func (categoryRouter CategoryRouter) SetupRouter() {
 	categoriesApi.DELETE(
 		"/:id",
 		categoryRouter.categoryHandler.DeleteCategoryById,
+		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 	categoriesApi.PATCH(
 		"/icon/:categoryId",
 		categoryRouter.categoryHandler.UploadCategoryIcon,
+		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 }

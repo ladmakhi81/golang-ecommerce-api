@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
+	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
 )
 
@@ -38,11 +39,13 @@ func (userRouter UserRouter) SetupRouter() {
 	usersApi.PATCH(
 		"/verify-account/:id",
 		userRouter.userHandler.VerifyAccountByAdmin,
+		middlewares.RoleMiddleware(userentity.AdminRole),
 	)
 
 	usersApi.PATCH(
 		"/complete-profile",
 		userRouter.userHandler.CompleteProfile,
+		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 
 	usersApi.PATCH(

@@ -5,6 +5,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	orderservice "github.com/ladmakhi81/golang-ecommerce-api/internal/order/service"
+	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
 type OrderRouter struct {
@@ -41,10 +42,12 @@ func (orderRouter OrderRouter) SetupRouter() {
 	orderApi.PATCH(
 		"/:orderId",
 		orderRouter.orderHandler.UpdateOrderStatus,
+		middlewares.RoleMiddleware(userentity.AdminRole),
 	)
 
 	orderApi.GET(
 		"/page",
 		orderRouter.orderHandler.FindOrdersPage,
+		middlewares.RoleMiddleware(userentity.AdminRole),
 	)
 }
