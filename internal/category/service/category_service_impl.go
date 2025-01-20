@@ -1,21 +1,35 @@
 package categoryservice
 
 import (
+	"fmt"
+	"io"
+	"math/rand"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path"
+	"path/filepath"
+	"time"
 
 	categorydto "github.com/ladmakhi81/golang-ecommerce-api/internal/category/dto"
 	categoryentity "github.com/ladmakhi81/golang-ecommerce-api/internal/category/entity"
 	categoryrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/category/repository"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 )
 
 type CategoryService struct {
 	categoryRepo categoryrepository.ICategoryRepository
+	config       config.MainConfig
 }
 
-func NewCategoryService(categoryRepo categoryrepository.ICategoryRepository) CategoryService {
+func NewCategoryService(
+	categoryRepo categoryrepository.ICategoryRepository,
+	config config.MainConfig,
+) CategoryService {
 	return CategoryService{
-		categoryRepo,
+		categoryRepo: categoryRepo,
+		config:       config,
 	}
 }
 
@@ -103,4 +117,36 @@ func (categoryService CategoryService) DeleteCategoryById(id uint) error {
 		)
 	}
 	return nil
+}
+func (categoryService CategoryService) UploadCategoryIcon(categoryId uint, filename string, file multipart.File) (string, error) {
+	category, categoryErr := categoryService.FindCategoryById(categoryId)
+	if categoryErr != nil {
+		return "", categoryErr
+	}
+	fileExtname := filepath.Ext(filename)
+	outputFilename := fmt.Sprintf("%d-%d%s", rand.Intn(10000000000000), int(time.Now().Unix()), fileExtname)
+	outputDestination := path.Join(categoryService.config.UploadDirectory, outputFilename)
+	outputFile, outputFileErr := os.Create(outputDestination)
+	if outputFileErr != nil {
+		return "", types.NewServerError(
+			"error in creating output file",
+			"CategoryService.UploadCategoryIcon.Create",
+			outputFileErr,
+		)
+	}
+	if _, copyErr := io.Copy(outputFile, file); copyErr != nil {
+		return "", types.NewServerError(
+			"error in copy file into output file",
+			"CategoryService.UploadCategoryIcon.Copy",
+			copyErr,
+		)
+	}
+	if setErr := categoryService.categoryRepo.SetCategoryIcon(category.ID, outputFilename); setErr != nil {
+		return "", types.NewServerError(
+			"error in setting category icon",
+			"CategoryService.UploadCategoryIcon.SetCategoryIcon",
+			setErr,
+		)
+	}
+	return outputFilename, nil
 }

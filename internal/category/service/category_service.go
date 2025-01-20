@@ -1,6 +1,8 @@
 package categoryservice
 
 import (
+	"mime/multipart"
+
 	categorydto "github.com/ladmakhi81/golang-ecommerce-api/internal/category/dto"
 	categoryentity "github.com/ladmakhi81/golang-ecommerce-api/internal/category/entity"
 )
@@ -11,4 +13,5 @@ type ICategoryService interface {
 	FindCategoriesTree() ([]*categoryentity.Category, error)
 	FindCategoriesPage(page, limit uint) ([]*categoryentity.Category, error)
 	DeleteCategoryById(id uint) error
+	UploadCategoryIcon(categoryId uint, filename string, file multipart.File) (string, error)
 }

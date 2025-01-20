@@ -26,36 +26,32 @@ func NewCategoryRouter(
 }
 
 func (categoryRouter CategoryRouter) SetupRouter() {
-	categoriesApiRouter := categoryRouter.apiRouter.Group("/categories")
+	categoriesApi := categoryRouter.apiRouter.Group("/categories")
 
-	categoriesApiRouter.POST(
+	categoriesApi.Use(
+		middlewares.AuthMiddleware(
+			categoryRouter.config.SecretKey,
+		),
+	)
+
+	categoriesApi.POST(
 		"",
 		categoryRouter.categoryHandler.CreateCategory,
-		middlewares.AuthMiddleware(
-			categoryRouter.config.SecretKey,
-		),
 	)
-
-	categoriesApiRouter.GET(
+	categoriesApi.GET(
 		"",
 		categoryRouter.categoryHandler.GetCategoriesTree,
-		middlewares.AuthMiddleware(
-			categoryRouter.config.SecretKey,
-		),
 	)
-
-	categoriesApiRouter.GET(
+	categoriesApi.GET(
 		"/page",
 		categoryRouter.categoryHandler.GetCategoriesPage,
-		middlewares.AuthMiddleware(
-			categoryRouter.config.SecretKey,
-		),
 	)
-	categoriesApiRouter.DELETE(
+	categoriesApi.DELETE(
 		"/:id",
 		categoryRouter.categoryHandler.DeleteCategoryById,
-		middlewares.AuthMiddleware(
-			categoryRouter.config.SecretKey,
-		),
+	)
+	categoriesApi.PATCH(
+		"/icon/:categoryId",
+		categoryRouter.categoryHandler.UploadCategoryIcon,
 	)
 }

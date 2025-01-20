@@ -35,6 +35,9 @@ type MainConfig struct {
 	ZarinpalVerifyURL   string `koanf:"zarinpal_verify_url" validate:"required"`
 	ZarinpalPayURL      string `koanf:"zarinpal_pay_url" validate:"required"`
 	ZarinpalCallbackURL string `koanf:"zarinpal_callback_url" validate:"required"`
+
+	// upload directory
+	UploadDirectory string `koanf:"upload_dir"`
 }
 
 func NewMainConfig() MainConfig {

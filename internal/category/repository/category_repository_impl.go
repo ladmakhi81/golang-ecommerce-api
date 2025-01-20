@@ -141,6 +141,15 @@ func (categoryRepo CategoryRepository) DeleteCategoryById(id uint) error {
 	row := categoryRepo.storage.DB.QueryRow(command, id)
 	return row.Err()
 }
+func (categoryRepo CategoryRepository) SetCategoryIcon(categoryId uint, filename string) error {
+	command := `
+		UPDATE _categories SET
+		icon = $1
+		WHERE id = $2;
+	`
+	row := categoryRepo.storage.DB.QueryRow(command, filename, categoryId)
+	return row.Err()
+}
 
 func buildNestedDataFromCategories(categories []*categoryentity.Category, parentCategoryID *uint) []*categoryentity.Category {
 	result := []*categoryentity.Category{}

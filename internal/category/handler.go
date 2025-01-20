@@ -77,3 +77,28 @@ func (categoryHandler CategoryHandler) DeleteCategoryById(c echo.Context) error 
 	})
 	return nil
 }
+func (categoryHandler CategoryHandler) UploadCategoryIcon(c echo.Context) error {
+	categoryId, parsedCategoryIdErr := categoryHandler.util.NumericParamConvertor(c.Param("categoryId"), "invalid category id")
+	if parsedCategoryIdErr != nil {
+		return parsedCategoryIdErr
+	}
+	fileHeader, fileHeaderErr := c.FormFile("icon")
+	if fileHeaderErr != nil {
+		return types.NewClientError("invalid provided file or file name", http.StatusBadRequest)
+	}
+	file, fileErr := fileHeader.Open()
+	if fileErr != nil {
+		return types.NewServerError(
+			"error in opening file header as file",
+			"CategoryHandler.UploadCategoryIcon.FileHeader.Open",
+			fileErr,
+		)
+	}
+	defer file.Close()
+	uploadedFilename, uploadedFileErr := categoryHandler.categoryService.UploadCategoryIcon(categoryId, fileHeader.Filename, file)
+	if uploadedFileErr != nil {
+		return uploadedFileErr
+	}
+	c.JSON(http.StatusOK, map[string]any{"success": true, "data": uploadedFilename})
+	return nil
+}

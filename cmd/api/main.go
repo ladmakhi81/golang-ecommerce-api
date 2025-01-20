@@ -88,7 +88,7 @@ func main() {
 	jwtService := authservice.NewJwtService(mainConfig)
 	userService := userservice.NewUserService(userRepo, emailService)
 	authService := authservice.NewAuthService(userService, jwtService, emailService)
-	categoryService := categoryservice.NewCategoryService(categoryRepo)
+	categoryService := categoryservice.NewCategoryService(categoryRepo, mainConfig)
 	transactionService := transactionservice.NewTransactionService(transactionRepo)
 	productService := productservice.NewProductService(userService, categoryService, productRepo, emailService)
 	productPriceService := productservice.NewProductPriceService(productService, productPriceRepo)
