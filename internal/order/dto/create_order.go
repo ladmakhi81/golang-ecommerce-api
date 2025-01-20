@@ -1,7 +1,8 @@
 package orderdto
 
 type CreateOrderReqBody struct {
-	CartIds []uint `json:"carts" validate:"required"`
+	CartIds   []uint `json:"carts" validate:"required"`
+	AddressId uint   `json:"addressId"`
 }
 
 type CreateOrderResponse struct {

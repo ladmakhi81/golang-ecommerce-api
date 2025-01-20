@@ -86,16 +86,22 @@ func (userRepo UserRepository) CompleteProfile(user *userentity.User) error {
 }
 func (userRepo UserRepository) FindBasicUserInfoById(id uint) (*userentity.User, error) {
 	command := `
-		SELECT email, user_role, is_complete_profile, is_verified FROM _users WHERE id = $1
+		SELECT email, user_role, is_complete_profile, is_verified, active_address FROM _users WHERE id = $1
 	`
 	row := userRepo.storage.DB.QueryRow(command, id)
+	var activeUserAddressId *uint
 	user := new(userentity.User)
+	user.ActiveAddress = new(userentity.UserAddress)
 	scanErr := row.Scan(
 		&user.Email,
 		&user.Role,
 		&user.IsCompleteProfile,
 		&user.IsVerified,
+		&activeUserAddressId,
 	)
+	if activeUserAddressId != nil {
+		user.ActiveAddress.ID = *activeUserAddressId
+	}
 	if scanErr != nil {
 		if scanErr == sql.ErrNoRows {
 			return nil, nil

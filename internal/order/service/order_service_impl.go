@@ -18,12 +18,13 @@ import (
 )
 
 type OrderService struct {
-	userService    userservice.IUserService
-	orderRepo      orderrepository.IOrderRepository
-	cartService    cartservice.ICartService
-	productService productservice.IProductService
-	paymentService paymentservice.IPaymentService
-	emailService   pkgemail.IEmailService
+	userService        userservice.IUserService
+	orderRepo          orderrepository.IOrderRepository
+	cartService        cartservice.ICartService
+	productService     productservice.IProductService
+	paymentService     paymentservice.IPaymentService
+	emailService       pkgemail.IEmailService
+	userAddressService userservice.IUserAddressService
 }
 
 func NewOrderService(
@@ -33,14 +34,16 @@ func NewOrderService(
 	productService productservice.IProductService,
 	paymentService paymentservice.IPaymentService,
 	emailService pkgemail.IEmailService,
+	userAddressService userservice.IUserAddressService,
 ) OrderService {
 	return OrderService{
-		userService:    userService,
-		orderRepo:      orderRepo,
-		cartService:    cartService,
-		productService: productService,
-		paymentService: paymentService,
-		emailService:   emailService,
+		userService:        userService,
+		orderRepo:          orderRepo,
+		cartService:        cartService,
+		productService:     productService,
+		paymentService:     paymentService,
+		emailService:       emailService,
+		userAddressService: userAddressService,
 	}
 }
 
@@ -49,9 +52,16 @@ func (orderService OrderService) SubmitOrder(customerId uint, reqBody orderdto.C
 	if customerErr != nil {
 		return nil, customerErr
 	}
+	// user don't have any address
+	if customer.ActiveAddress.ID == 0 && reqBody.AddressId == 0 {
+		return nil, types.NewClientError("user don't have any address", http.StatusBadRequest)
+	}
 	carts, cartsErr := orderService.cartService.FindCartsByIds(reqBody.CartIds)
 	if cartsErr != nil {
 		return nil, cartsErr
+	}
+	if len(carts) != len(reqBody.CartIds) {
+		return nil, types.NewClientError("carts is not found", http.StatusNotFound)
 	}
 	for _, cart := range carts {
 		if cart.Customer.ID != customerId {
@@ -60,6 +70,15 @@ func (orderService OrderService) SubmitOrder(customerId uint, reqBody orderdto.C
 	}
 	finalPrice := orderService.cartService.CalculateFinalPriceOfCarts(carts)
 	order := orderentity.NewOrder(customer, finalPrice)
+	if reqBody.AddressId == 0 {
+		order.Address = customer.ActiveAddress
+	} else {
+		address, addressErr := orderService.userAddressService.FindAddressById(reqBody.AddressId)
+		if addressErr != nil {
+			return nil, addressErr
+		}
+		order.Address = address
+	}
 	order.Items = []*orderentity.OrderItem{}
 	orderErr := orderService.orderRepo.CreateOrder(order)
 	if orderErr != nil {

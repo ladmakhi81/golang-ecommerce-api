@@ -21,7 +21,7 @@ func NewOrderRepository(storage *storage.Storage) OrderRepository {
 
 func (orderRepo OrderRepository) CreateOrder(order *orderentity.Order) error {
 	command := `
-		INSERT INTO _orders (customer_id, status, final_price) VALUES ($1, $2, $3)
+		INSERT INTO _orders (customer_id, status, final_price, address_id) VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at, updated_at;
 	`
 	row := orderRepo.storage.DB.QueryRow(
@@ -29,6 +29,7 @@ func (orderRepo OrderRepository) CreateOrder(order *orderentity.Order) error {
 		order.Customer.ID,
 		orderentity.OrderStatusPending,
 		order.FinalPrice,
+		order.Address.ID,
 	)
 	scanErr := row.Scan(
 		&order.ID,
