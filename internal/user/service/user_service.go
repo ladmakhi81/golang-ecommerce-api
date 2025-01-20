@@ -13,4 +13,5 @@ type IUserService interface {
 	CompleteProfile(userId uint, data *userdto.CompleteProfileReqBody) (*userentity.User, error)
 	FindBasicUserInfoById(id uint) (*userentity.User, error)
 	VerifyAccountByAdmin(adminId uint, vendorId uint) error
+	SetActiveUserAddress(userId uint, addressId uint) error
 }

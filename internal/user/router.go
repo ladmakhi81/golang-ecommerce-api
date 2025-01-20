@@ -45,6 +45,11 @@ func (userRouter UserRouter) SetupRouter() {
 		userRouter.userHandler.CompleteProfile,
 	)
 
+	usersApi.PATCH(
+		"/address/active",
+		userRouter.userHandler.AssignActiveAddressUser,
+	)
+
 	usersApi.POST(
 		"/address",
 		userRouter.userHandler.CreateUserAddress,

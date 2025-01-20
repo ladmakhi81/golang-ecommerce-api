@@ -199,3 +199,14 @@ func (userService UserService) hashUserPassword(password string) (string, error)
 	}
 	return string(hashedPassword), nil
 }
+func (userService UserService) SetActiveUserAddress(userId uint, addressId uint) error {
+	err := userService.userRepo.SetActiveUserAddress(userId, addressId)
+	if err != nil {
+		return types.NewServerError(
+			"error in setting active address for user",
+			"UserService.SetActiveUserAddress",
+			err,
+		)
+	}
+	return nil
+}

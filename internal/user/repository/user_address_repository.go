@@ -5,4 +5,5 @@ import userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/enti
 type IUserAddressRepository interface {
 	CreateUserAddress(userAddress *userentity.UserAddress) error
 	GetUserAddresses(userId uint) ([]*userentity.UserAddress, error)
+	FindAddressById(addressId uint) (*userentity.UserAddress, error)
 }

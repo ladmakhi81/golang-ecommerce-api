@@ -9,4 +9,5 @@ type IUserRepository interface {
 	CompleteProfile(user *userentity.User) error
 	FindBasicUserInfoById(id uint) (*userentity.User, error)
 	UpdateVerificationState(adminId uint, vendorId uint) error
+	SetActiveUserAddress(userId uint, addressId uint) error
 }

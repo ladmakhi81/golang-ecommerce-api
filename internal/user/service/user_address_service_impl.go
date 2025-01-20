@@ -1,6 +1,8 @@
 package userservice
 
 import (
+	"net/http"
+
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 	userdto "github.com/ladmakhi81/golang-ecommerce-api/internal/user/dto"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
@@ -54,4 +56,28 @@ func (userAddressService UserAddressService) GetUserAddresses(userId uint) ([]*u
 		)
 	}
 	return addresses, nil
+}
+func (userAddressService UserAddressService) AssignUserAddress(userId uint, reqBody userdto.AssignActiveAddressUserReqBody) error {
+	address, addressErr := userAddressService.FindAddressById(reqBody.AddressId)
+	if addressErr != nil {
+		return addressErr
+	}
+	if err := userAddressService.userService.SetActiveUserAddress(userId, address.ID); err != nil {
+		return err
+	}
+	return nil
+}
+func (userAddressService UserAddressService) FindAddressById(addressId uint) (*userentity.UserAddress, error) {
+	address, addressErr := userAddressService.userAddressRepo.FindAddressById(addressId)
+	if addressErr != nil {
+		return nil, types.NewServerError(
+			"error in finding address by address id",
+			"UserAddressService.FindAddressById",
+			addressErr,
+		)
+	}
+	if address == nil {
+		return nil, types.NewClientError("address not found", http.StatusNotFound)
+	}
+	return address, nil
 }

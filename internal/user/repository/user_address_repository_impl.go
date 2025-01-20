@@ -1,6 +1,8 @@
 package userrepository
 
 import (
+	"database/sql"
+
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/storage"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
@@ -75,4 +77,36 @@ func (userAddressRepo UserAddressRepository) GetUserAddresses(userId uint) ([]*u
 		userAddresses = append(userAddresses, userAddress)
 	}
 	return userAddresses, nil
+}
+func (userAddressRepo UserAddressRepository) FindAddressById(addressId uint) (*userentity.UserAddress, error) {
+	command := `
+		SELECT
+		a.id, a.created_at, a.updated_at, a.city, a.province, a.license_plate, a.address, a.description,
+		u.id, u.email 
+		FROM _user_addresses a
+		INNER JOIN _users u ON a.user_id = u.id
+		WHERE a.id = $1
+	`
+	row := userAddressRepo.storage.DB.QueryRow(command, addressId)
+	userAddress := new(userentity.UserAddress)
+	userAddress.User = new(userentity.User)
+	scanErr := row.Scan(
+		&userAddress.ID,
+		&userAddress.CreatedAt,
+		&userAddress.UpdatedAt,
+		&userAddress.City,
+		&userAddress.Province,
+		&userAddress.LicensePlate,
+		&userAddress.Address,
+		&userAddress.Description,
+		&userAddress.User.ID,
+		&userAddress.User.Email,
+	)
+	if scanErr != nil {
+		if scanErr == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, scanErr
+	}
+	return userAddress, nil
 }

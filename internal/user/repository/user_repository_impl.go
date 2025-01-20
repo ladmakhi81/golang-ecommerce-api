@@ -121,3 +121,12 @@ func (userRepo UserRepository) UpdateVerificationState(adminId uint, vendorId ui
 	)
 	return row.Err()
 }
+func (userRepo UserRepository) SetActiveUserAddress(userId uint, addressId uint) error {
+	command := `
+		UPDATE _users SET
+		active_address = $1
+		WHERE id = $2
+	`
+	row := userRepo.storage.DB.QueryRow(command, userId, addressId)
+	return row.Err()
+}

@@ -84,3 +84,21 @@ func (userHandler UserHandler) GetUserAddresses(c echo.Context) error {
 	c.JSON(http.StatusOK, map[string]any{"data": addresses})
 	return nil
 }
+func (userHandler UserHandler) AssignActiveAddressUser(c echo.Context) error {
+	auth := c.Get("AuthClaim").(*types.AuthClaim)
+	var reqBody userdto.AssignActiveAddressUserReqBody
+	if err := c.Bind(&reqBody); err != nil {
+		return types.NewClientError("invalid request body", http.StatusBadRequest)
+	}
+	if err := c.Validate(reqBody); err != nil {
+		return err
+	}
+	if err := userHandler.userAddressService.AssignUserAddress(auth.ID, reqBody); err != nil {
+		return err
+	}
+	c.JSON(http.StatusOK, map[string]any{
+		"message": "address assigned successfully",
+		"success": true,
+	})
+	return nil
+}
