@@ -6,12 +6,14 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type UserRouter struct {
 	apiRouter   *echo.Group
 	userHandler UserHandler
 	config      config.MainConfig
+	transation  translations.ITranslation
 }
 
 func NewUserRouter(
@@ -19,11 +21,12 @@ func NewUserRouter(
 	userService userservice.IUserService,
 	userAddressService userservice.IUserAddressService,
 	config config.MainConfig,
+	transation translations.ITranslation,
 ) UserRouter {
 	return UserRouter{
 		config:      config,
 		apiRouter:   apiRouter,
-		userHandler: NewUserHandler(userService, userAddressService),
+		userHandler: NewUserHandler(userService, userAddressService, transation),
 	}
 }
 

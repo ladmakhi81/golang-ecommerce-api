@@ -1,0 +1,45 @@
+{
+    "errors": {
+        "invalid_request_body": "Your request body has wrong format"
+    },
+    "auth": {
+        "invalid_role": "Provided role is invalid",
+        "signup_subject_email": "Your account created successfully",
+        "signup_body_email": "welcome to gocommerce application"
+    },
+    "user": {
+        "invalid_id": "Provided vendor id has wrong format",
+        "email_duplicate_error": "Provided email has already exist",
+        "not_found": "User not found with provided information",
+        "not_found_email": "User not found with this email address",
+        "not_found_id": "User not found with provided id",
+        "complete_profile_subject_email": "Congrats,you complete your profile information",
+        "complete_profile_body_email": "as soon as possible our supporters validate your information and verify your account",
+        "complete_profile_error": "Vendor must complete profile account after that you can verify it",
+        "admin_verify_account_subject_email": "you verified vendor account, are you sure?",
+        "admin_verify_account_body_email": "you verify {{.Name}} at {{.Date}}, please double check to avoid fault",
+        "user_verify_account_subject_email": "hey dear!!!",
+        "user_verify_account_body_email": "Your account verified successfully",
+        "user_address_not_found_id": "User address not found with provided id",
+        "vendor_verified_error": "You must verify your account"
+    },
+    "category": {
+        "invalid_id": "Provided category id has wrong format",
+        "invalid_icon": "Uploaded file has wrong format",
+        "category_name_duplicate_error": "Provided category name has already exist",
+        "category_not_found_id": "Category is not found with this id"
+    },
+    "product": {
+        "invalid_id": "Provided product id has wrong format",
+        "invalid_price_item_id": "Provided price item id has wrong format",
+        "vendor_product_create_subject_email": "Product {{.ProductName}} created",
+        "vendor_product_create_body_email": "You Create Product {{.Name}} With ID {{.ID}} At {{.Date}}, Wait Until Admins Verify This Product",
+        "invalid_fee": "Fee must be less than base price of products",
+        "verified_product_before": "Product verified before",
+        "verify_product_subject_email": "Your product verified",
+        "verify_product_body_email": "Product {{.Name}} with id {{.ID}} verified at {{.Date}}",
+        "product_not_found_id": "Product not found with this id",
+        "owner_delete_error": "Only creator of product can delete it",
+        "owner_upload_image_error": "Only the owner of product can upload images"
+    }
+}

@@ -9,22 +9,26 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 	productdto "github.com/ladmakhi81/golang-ecommerce-api/internal/product/dto"
 	productservice "github.com/ladmakhi81/golang-ecommerce-api/internal/product/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type ProductHandler struct {
 	productService      productservice.IProductService
 	productPriceService productservice.IProductPriceService
 	util                utils.Util
+	translation         translations.ITranslation
 }
 
 func NewProductHandler(
 	productService productservice.IProductService,
 	productPriceService productservice.IProductPriceService,
+	translation translations.ITranslation,
 ) ProductHandler {
 	return ProductHandler{
 		productService:      productService,
 		productPriceService: productPriceService,
 		util:                utils.NewUtil(),
+		translation:         translation,
 	}
 }
 
@@ -33,7 +37,7 @@ func (productHandler ProductHandler) CreateProduct(c echo.Context) error {
 	var reqBody productdto.CreateProductReqBody
 	if err := c.Bind(&reqBody); err != nil {
 		return types.NewClientError(
-			"invalid request body",
+			productHandler.translation.Message("errors.invalid_request_body"),
 			http.StatusBadRequest,
 		)
 	}
@@ -53,13 +57,19 @@ func (productHandler ProductHandler) CreateProduct(c echo.Context) error {
 }
 func (productHandler ProductHandler) ConfirmProductByAdmin(c echo.Context) error {
 	adminId := c.Get("AuthClaim").(*types.AuthClaim).ID
-	productId, parseProductIdErr := productHandler.util.NumericParamConvertor(c.Param("id"), "invalid product id")
+	productId, parseProductIdErr := productHandler.util.NumericParamConvertor(
+		c.Param("id"),
+		productHandler.translation.Message("product.invalid_id"),
+	)
 	if parseProductIdErr != nil {
 		return parseProductIdErr
 	}
 	var reqBody productdto.VerifyProductReqBody
 	if err := c.Bind(&reqBody); err != nil {
-		return types.NewClientError("invalid request body", http.StatusBadRequest)
+		return types.NewClientError(
+			productHandler.translation.Message("errors.invalid_request_body"),
+			http.StatusBadRequest,
+		)
 	}
 	if err := c.Validate(reqBody); err != nil {
 		return err
@@ -75,7 +85,10 @@ func (productHandler ProductHandler) ConfirmProductByAdmin(c echo.Context) error
 	return nil
 }
 func (productHandler ProductHandler) FindProductDetailById(c echo.Context) error {
-	productId, parsedProductIdErr := productHandler.util.NumericParamConvertor(c.Param("id"), "invalid product id")
+	productId, parsedProductIdErr := productHandler.util.NumericParamConvertor(
+		c.Param("id"),
+		productHandler.translation.Message("product.invalid_id"),
+	)
 	if parsedProductIdErr != nil {
 		return parsedProductIdErr
 	}
@@ -110,7 +123,10 @@ func (productHandler ProductHandler) GetProductsPage(c echo.Context) error {
 }
 func (productHandler ProductHandler) DeleteProductById(c echo.Context) error {
 	vendorId := c.Get("AuthClaim").(*types.AuthClaim).ID
-	productId, parsedProductIdErr := productHandler.util.NumericParamConvertor(c.Param("id"), "invalid product id")
+	productId, parsedProductIdErr := productHandler.util.NumericParamConvertor(
+		c.Param("id"),
+		productHandler.translation.Message("product.invalid_id"),
+	)
 	if parsedProductIdErr != nil {
 		return parsedProductIdErr
 	}
@@ -128,13 +144,19 @@ func (productHandler ProductHandler) DeleteProductById(c echo.Context) error {
 func (productHandler ProductHandler) AddPriceToProductPriceList(c echo.Context) error {
 	var reqBody productdto.AddPriceToProductsPriceListReqBody
 	if err := c.Bind(&reqBody); err != nil {
-		return types.NewClientError("invalid request body", http.StatusBadRequest)
+		return types.NewClientError(
+			productHandler.translation.Message("errors.invalid_request_body"),
+			http.StatusBadRequest,
+		)
 	}
 	if err := c.Validate(reqBody); err != nil {
 		return err
 	}
 	vendorId := c.Get("AuthClaim").(*types.AuthClaim).ID
-	productId, parsedProductIdErr := productHandler.util.NumericParamConvertor(c.Param("product_id"), "invalid product id")
+	productId, parsedProductIdErr := productHandler.util.NumericParamConvertor(
+		c.Param("product_id"),
+		productHandler.translation.Message("product.invalid_id"),
+	)
 	if parsedProductIdErr != nil {
 		return parsedProductIdErr
 	}
@@ -152,7 +174,7 @@ func (productHandler ProductHandler) AddPriceToProductPriceList(c echo.Context) 
 func (productHandler ProductHandler) DeletePriceItem(c echo.Context) error {
 	itemId, parsedItemIdErr := productHandler.util.NumericParamConvertor(
 		c.Param("id"),
-		"invalid price item id",
+		productHandler.translation.Message("product.invalid_price_item_id"),
 	)
 	if parsedItemIdErr != nil {
 		return parsedItemIdErr
@@ -168,7 +190,10 @@ func (productHandler ProductHandler) DeletePriceItem(c echo.Context) error {
 	return nil
 }
 func (productHandler ProductHandler) GetPricesOfProduct(c echo.Context) error {
-	productId, parseErr := productHandler.util.NumericParamConvertor(c.Param("productId"), "invalid product")
+	productId, parseErr := productHandler.util.NumericParamConvertor(
+		c.Param("productId"),
+		productHandler.translation.Message("product.invalid_id"),
+	)
 	if parseErr != nil {
 		return parseErr
 	}
@@ -185,7 +210,10 @@ func (productHandler ProductHandler) GetPricesOfProduct(c echo.Context) error {
 }
 func (productHandler ProductHandler) UploadProductImages(c echo.Context) error {
 	ownerId := c.Get("AuthClaim").(*types.AuthClaim).ID
-	productId, parsedProductIdErr := productHandler.util.NumericParamConvertor(c.Param("id"), "invalid product id")
+	productId, parsedProductIdErr := productHandler.util.NumericParamConvertor(
+		c.Param("id"),
+		productHandler.translation.Message("product.invalid_id"),
+	)
 	if parsedProductIdErr != nil {
 		return parsedProductIdErr
 	}

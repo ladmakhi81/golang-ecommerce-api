@@ -7,20 +7,24 @@ import (
 	userdto "github.com/ladmakhi81/golang-ecommerce-api/internal/user/dto"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 	userrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/user/repository"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type UserAddressService struct {
 	userAddressRepo userrepository.IUserAddressRepository
 	userService     IUserService
+	translation     translations.ITranslation
 }
 
 func NewUserAddressService(
 	userAddressRepo userrepository.IUserAddressRepository,
 	userService IUserService,
+	translation translations.ITranslation,
 ) UserAddressService {
 	return UserAddressService{
 		userAddressRepo: userAddressRepo,
 		userService:     userService,
+		translation:     translation,
 	}
 }
 
@@ -77,7 +81,10 @@ func (userAddressService UserAddressService) FindAddressById(addressId uint) (*u
 		)
 	}
 	if address == nil {
-		return nil, types.NewClientError("address not found", http.StatusNotFound)
+		return nil, types.NewClientError(
+			userAddressService.translation.Message("user.user_address_not_found_id"),
+			http.StatusNotFound,
+		)
 	}
 	return address, nil
 }

@@ -9,28 +9,35 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 	userdto "github.com/ladmakhi81/golang-ecommerce-api/internal/user/dto"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type UserHandler struct {
 	userService        userservice.IUserService
 	userAddressService userservice.IUserAddressService
 	util               utils.Util
+	translation        translations.ITranslation
 }
 
 func NewUserHandler(
 	userService userservice.IUserService,
 	userAddressService userservice.IUserAddressService,
+	translation translations.ITranslation,
 ) UserHandler {
 	return UserHandler{
 		userService:        userService,
 		util:               utils.NewUtil(),
 		userAddressService: userAddressService,
+		translation:        translation,
 	}
 }
 
 func (userHandler UserHandler) VerifyAccountByAdmin(c echo.Context) error {
 	adminId := c.Get("AuthClaim").(*types.AuthClaim).ID
-	vendorId, parsedVendorErr := userHandler.util.NumericParamConvertor(c.Param("id"), "the provided id has wrong format")
+	vendorId, parsedVendorErr := userHandler.util.NumericParamConvertor(
+		c.Param("id"),
+		userHandler.translation.Message("user.invalid_id"),
+	)
 	if parsedVendorErr != nil {
 		return parsedVendorErr
 	}
@@ -49,7 +56,10 @@ func (userHandler UserHandler) CompleteProfile(c echo.Context) error {
 	auth := c.Get("AuthClaim").(*types.AuthClaim)
 	var reqBody userdto.CompleteProfileReqBody
 	if err := c.Bind(&reqBody); err != nil {
-		return types.NewClientError("invalid request body", http.StatusBadGateway)
+		return types.NewClientError(
+			userHandler.translation.Message("errors.invalid_request_body"),
+			http.StatusBadGateway,
+		)
 	}
 	if err := c.Validate(reqBody); err != nil {
 		return err
@@ -69,7 +79,10 @@ func (userHandler UserHandler) CreateUserAddress(c echo.Context) error {
 	auth := c.Get("AuthClaim").(*types.AuthClaim)
 	var reqBody userdto.CreateUserAddressReqBody
 	if err := c.Bind(&reqBody); err != nil {
-		return types.NewClientError("invalid request body", http.StatusBadRequest)
+		return types.NewClientError(
+			userHandler.translation.Message("errors.invalid_request_body"),
+			http.StatusBadGateway,
+		)
 	}
 	if err := c.Validate(reqBody); err != nil {
 		return err
@@ -102,7 +115,10 @@ func (userHandler UserHandler) AssignActiveAddressUser(c echo.Context) error {
 	auth := c.Get("AuthClaim").(*types.AuthClaim)
 	var reqBody userdto.AssignActiveAddressUserReqBody
 	if err := c.Bind(&reqBody); err != nil {
-		return types.NewClientError("invalid request body", http.StatusBadRequest)
+		return types.NewClientError(
+			userHandler.translation.Message("errors.invalid_request_body"),
+			http.StatusBadGateway,
+		)
 	}
 	if err := c.Validate(reqBody); err != nil {
 		return err

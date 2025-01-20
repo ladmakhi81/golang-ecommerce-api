@@ -1,7 +1,6 @@
 package userservice
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -11,18 +10,25 @@ import (
 	userrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/user/repository"
 	pkgemaildto "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/dto"
 	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
 	userRepo     userrepository.IUserRepository
 	emailService pkgemail.IEmailService
+	translation  translations.ITranslation
 }
 
-func NewUserService(userRepo userrepository.IUserRepository, emailService pkgemail.IEmailService) UserService {
+func NewUserService(
+	userRepo userrepository.IUserRepository,
+	emailService pkgemail.IEmailService,
+	translation translations.ITranslation,
+) UserService {
 	return UserService{
-		userRepo,
-		emailService,
+		userRepo:     userRepo,
+		emailService: emailService,
+		translation:  translation,
 	}
 }
 
@@ -36,7 +42,10 @@ func (userService UserService) CheckDuplicatedUserEmail(email string) error {
 		)
 	}
 	if isExist {
-		return types.NewClientError("email is already exist", http.StatusConflict)
+		return types.NewClientError(
+			translations.NewTranslation().Message("user.email_duplicate_error"),
+			http.StatusConflict,
+		)
 	}
 	return nil
 }
@@ -68,7 +77,10 @@ func (userService UserService) FindUserByEmailAndPassword(email, password string
 		return nil, findUserErr
 	}
 	if !userService.isValidPassword(user.Password, password) {
-		return nil, types.NewClientError("user not found with this information", http.StatusNotFound)
+		return nil, types.NewClientError(
+			userService.translation.Message("user.not_found"),
+			http.StatusNotFound,
+		)
 	}
 	// TODO: move this logic into separated middleware
 	// if user.Role != userentity.CustomerRole && !user.IsVerified {
@@ -87,7 +99,7 @@ func (userService UserService) FindUserByEmail(email string) (*userentity.User, 
 	}
 	if user == nil {
 		return nil, types.NewClientError(
-			"user not found with this email address",
+			userService.translation.Message("user.not_found_email"),
 			http.StatusNotFound,
 		)
 	}
@@ -104,7 +116,7 @@ func (userService UserService) FindBasicUserInfoById(id uint) (*userentity.User,
 	}
 	if user == nil {
 		return nil, types.NewClientError(
-			"user not found with this id",
+			userService.translation.Message("user.not_found_id"),
 			http.StatusNotFound,
 		)
 	}
@@ -131,8 +143,8 @@ func (userService UserService) CompleteProfile(userId uint, data *userdto.Comple
 	userService.emailService.SendEmail(
 		pkgemaildto.NewSendEmailDto(
 			user.Email,
-			"You Complete Your Profile Information",
-			"As Soon as possible our supporters validate your information and verify your account",
+			userService.translation.Message("user.complete_profile_subject_email"),
+			userService.translation.Message("user.complete_profile_body_email"),
 		),
 	)
 	return user, nil
@@ -148,7 +160,7 @@ func (userService UserService) VerifyAccountByAdmin(adminId uint, vendorId uint)
 	}
 	if !vendor.IsCompleteProfile {
 		return types.NewClientError(
-			"vendor account first must complete profile account",
+			translations.NewTranslation().Message("complete_profile_error"),
 			http.StatusBadRequest,
 		)
 	}
@@ -166,18 +178,18 @@ func (userService UserService) VerifyAccountByAdmin(adminId uint, vendorId uint)
 	userService.emailService.SendEmail(
 		pkgemaildto.NewSendEmailDto(
 			admin.Email,
-			"you verified vendor account, are you sure?",
-			fmt.Sprintf("you verify %s at %v, please double check to avoid fault",
-				vendor.FullName,
-				time.Now().Format("2006-01-02 15:04:05"),
-			),
+			userService.translation.Message("admin_verify_account_subject_email"),
+			userService.translation.MessageWithArgs("admin_verify_account_body_email", map[string]any{
+				"Name": vendor.FullName,
+				"Date": time.Now().Format("2006-01-02 15:04:05"),
+			}),
 		),
 	)
 	userService.emailService.SendEmail(
 		pkgemaildto.NewSendEmailDto(
 			vendor.Email,
-			"hey dear!!!",
-			"Your account verified successfully",
+			userService.translation.Message("user_verify_account_subject_email"),
+			userService.translation.Message("user_verify_account_body_email"),
 		),
 	)
 	return nil

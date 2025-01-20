@@ -16,20 +16,24 @@ import (
 	categoryrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/category/repository"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type CategoryService struct {
 	categoryRepo categoryrepository.ICategoryRepository
 	config       config.MainConfig
+	translation  translations.ITranslation
 }
 
 func NewCategoryService(
 	categoryRepo categoryrepository.ICategoryRepository,
 	config config.MainConfig,
+	translation translations.ITranslation,
 ) CategoryService {
 	return CategoryService{
 		categoryRepo: categoryRepo,
 		config:       config,
+		translation:  translation,
 	}
 }
 
@@ -44,7 +48,7 @@ func (categoryService CategoryService) CreateCategory(reqBody categorydto.Create
 	}
 	if categoryExistByName {
 		return nil, types.NewClientError(
-			"category exist by name",
+			categoryService.translation.Message("category.category_name_duplicate_error"),
 			http.StatusConflict,
 		)
 	}
@@ -77,7 +81,7 @@ func (categoryService CategoryService) FindCategoryById(id uint) (*categoryentit
 	}
 	if category == nil {
 		return nil, types.NewClientError(
-			"category not found with this provided id",
+			categoryService.translation.Message("category.category_not_found_id"),
 			http.StatusNotFound,
 		)
 	}

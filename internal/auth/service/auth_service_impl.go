@@ -9,29 +9,36 @@ import (
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
 	pkgemaildto "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/dto"
 	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type AuthService struct {
 	userService  userservice.IUserService
 	jwtService   IJwtService
 	emailService pkgemail.IEmailService
+	translation  translations.ITranslation
 }
 
 func NewAuthService(
 	userService userservice.IUserService,
 	jwtService IJwtService,
 	emailService pkgemail.IEmailService,
+	translation translations.ITranslation,
 ) AuthService {
 	return AuthService{
-		userService,
-		jwtService,
-		emailService,
+		userService:  userService,
+		jwtService:   jwtService,
+		emailService: emailService,
+		translation:  translation,
 	}
 }
 
 func (authService AuthService) Signup(reqBody authdto.SignupReqBody) (*authdto.SignupResponse, error) {
 	if reqBody.Role == userentity.AdminRole {
-		return nil, types.NewClientError("Invalid role type", http.StatusBadRequest)
+		return nil, types.NewClientError(
+			authService.translation.Message("auth.invalid_role"),
+			http.StatusBadRequest,
+		)
 	}
 	createdUser, createdUserErr := authService.userService.CreateBasicUser(reqBody.Email, reqBody.Password, reqBody.Role)
 	if createdUserErr != nil {
@@ -48,8 +55,8 @@ func (authService AuthService) Signup(reqBody authdto.SignupReqBody) (*authdto.S
 	authService.emailService.SendEmail(
 		pkgemaildto.NewSendEmailDto(
 			createdUser.Email,
-			"Your Account Created Successfully",
-			"Welcome To GoEcommerce Application",
+			authService.translation.Message("auth.signup_subject_email"),
+			authService.translation.Message("auth.signup_body_email"),
 		),
 	)
 	return authdto.NewSignupResponse(generatedAccessToken), nil

@@ -7,6 +7,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 	productservice "github.com/ladmakhi81/golang-ecommerce-api/internal/product/service"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type ProductRouter struct {
@@ -16,6 +17,7 @@ type ProductRouter struct {
 	productPriceService productservice.IProductPriceService
 	util                utils.Util
 	config              config.MainConfig
+	translation         translations.ITranslation
 }
 
 func NewProductRouter(
@@ -23,10 +25,11 @@ func NewProductRouter(
 	config config.MainConfig,
 	productService productservice.IProductService,
 	productPriceService productservice.IProductPriceService,
+	translation translations.ITranslation,
 ) ProductRouter {
 	return ProductRouter{
 		apiRouter:      apiRouter,
-		productHandler: NewProductHandler(productService, productPriceService),
+		productHandler: NewProductHandler(productService, productPriceService, translation),
 		util:           utils.NewUtil(),
 		config:         config,
 	}

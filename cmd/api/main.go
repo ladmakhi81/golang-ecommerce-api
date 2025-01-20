@@ -38,12 +38,16 @@ import (
 	vendorincomerepository "github.com/ladmakhi81/golang-ecommerce-api/internal/vendor_income/repository"
 	vendorincomeservice "github.com/ladmakhi81/golang-ecommerce-api/internal/vendor_income/service"
 	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 	pkgzarinpalservice "github.com/ladmakhi81/golang-ecommerce-api/pkg/zarinpal/service"
 )
 
 func main() {
+
 	mainConfig := config.NewMainConfig()
 	mainConfig.LoadConfigs()
+
+	translation := translations.NewTranslation()
 
 	storage := storage.NewStorage(mainConfig)
 
@@ -86,15 +90,15 @@ func main() {
 	zarinpalService := pkgzarinpalservice.NewZarinpalService(mainConfig)
 	emailService := pkgemail.NewEmailService(mainConfig)
 	jwtService := authservice.NewJwtService(mainConfig)
-	userService := userservice.NewUserService(userRepo, emailService)
-	authService := authservice.NewAuthService(userService, jwtService, emailService)
-	categoryService := categoryservice.NewCategoryService(categoryRepo, mainConfig)
+	userService := userservice.NewUserService(userRepo, emailService, translation)
+	authService := authservice.NewAuthService(userService, jwtService, emailService, translation)
+	categoryService := categoryservice.NewCategoryService(categoryRepo, mainConfig, translation)
 	transactionService := transactionservice.NewTransactionService(transactionRepo)
-	productService := productservice.NewProductService(userService, categoryService, productRepo, emailService)
+	productService := productservice.NewProductService(userService, categoryService, productRepo, emailService, translation)
 	productPriceService := productservice.NewProductPriceService(productService, productPriceRepo)
 	cartService := cartservice.NewCartService(cartRepo, productService, productPriceService, userService)
 	paymentService := paymentservice.NewPaymentService(paymentRepo, zarinpalService, transactionService, &eventContainer)
-	userAddressService := userservice.NewUserAddressService(userAddressRepo, userService)
+	userAddressService := userservice.NewUserAddressService(userAddressRepo, userService, translation)
 	orderService := orderservice.NewOrderService(userService, orderRepo, cartService, productService, paymentService, emailService, userAddressService)
 	vendorIncomeService := vendorincomeservice.NewVendorIncomeService(vendorIncomeRepo, orderService, transactionService)
 
@@ -109,16 +113,16 @@ func main() {
 	orderEventContainer := orderevent.NewOrderEventsContainer(&eventContainer, orderEventSubscriber)
 	orderEventContainer.RegisterEvents()
 
-	authRouter := auth.NewAuthRouter(apiRoute, authService)
+	authRouter := auth.NewAuthRouter(apiRoute, authService, translation)
 	authRouter.SetupRouter()
 
-	usersRouter := user.NewUserRouter(apiRoute, userService, userAddressService, mainConfig)
+	usersRouter := user.NewUserRouter(apiRoute, userService, userAddressService, mainConfig, translation)
 	usersRouter.SetupRouter()
 
-	categoryRouter := category.NewCategoryRouter(apiRoute, mainConfig, categoryService)
+	categoryRouter := category.NewCategoryRouter(apiRoute, mainConfig, categoryService, translation)
 	categoryRouter.SetupRouter()
 
-	productRouter := product.NewProductRouter(apiRoute, mainConfig, productService, productPriceService)
+	productRouter := product.NewProductRouter(apiRoute, mainConfig, productService, productPriceService, translation)
 	productRouter.SetupRouter()
 
 	cartRouter := cart.NewCartRouter(apiRoute, mainConfig, cartService)

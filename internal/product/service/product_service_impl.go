@@ -19,6 +19,7 @@ import (
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
 	pkgemaildto "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/dto"
 	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type ProductService struct {
@@ -26,6 +27,7 @@ type ProductService struct {
 	categoryService categoryservice.ICategoryService
 	productRepo     productrepository.IProductRepository
 	emailService    pkgemail.IEmailService
+	translation     translations.ITranslation
 }
 
 func NewProductService(
@@ -33,12 +35,14 @@ func NewProductService(
 	categoryService categoryservice.ICategoryService,
 	productRepo productrepository.IProductRepository,
 	emailService pkgemail.IEmailService,
+	translation translations.ITranslation,
 ) ProductService {
 	return ProductService{
 		userService:     userService,
 		categoryService: categoryService,
 		productRepo:     productRepo,
 		emailService:    emailService,
+		translation:     translation,
 	}
 }
 
@@ -50,7 +54,7 @@ func (productService ProductService) CreateProduct(reqBody productdto.CreateProd
 	// TODO: move this verification logic into separate middleware
 	if !vendor.IsVerified {
 		return nil, types.NewClientError(
-			"you must verify your account",
+			productService.translation.Message("user.vendor_verified_error"),
 			http.StatusForbidden,
 		)
 	}
@@ -79,9 +83,18 @@ func (productService ProductService) CreateProduct(reqBody productdto.CreateProd
 	productService.emailService.SendEmail(
 		pkgemaildto.NewSendEmailDto(
 			product.Vendor.Email,
-			fmt.Sprintf("Product %s Created", product.Name),
-			fmt.Sprintf("You Create Product %s With ID %d At %v, Wait Until Admins Verify This Product",
-				product.Name, product.ID, product.CreatedAt.Format("2006-01-02 15:04:05")),
+			productService.translation.MessageWithArgs(
+				"product.vendor_product_create_subject_email",
+				map[string]any{"ProductName": product.Name},
+			),
+			productService.translation.MessageWithArgs(
+				"product.vendor_product_create_body_email",
+				map[string]any{
+					"Name": product.Name,
+					"ID":   product.ID,
+					"Date": product.CreatedAt.Format("2006-01-02 15:04:05"),
+				},
+			),
 		),
 	)
 	return product, nil
@@ -96,10 +109,16 @@ func (productService ProductService) ConfirmProductByAdmin(adminId uint, product
 		return adminErr
 	}
 	if fee > product.BasePrice {
-		return types.NewClientError("fee must be less than base price of products", http.StatusBadRequest)
+		return types.NewClientError(
+			productService.translation.Message("product.invalid_fee"),
+			http.StatusBadRequest,
+		)
 	}
 	if product.IsConfirmed {
-		return types.NewClientError("product verified before", http.StatusBadRequest)
+		return types.NewClientError(
+			productService.translation.Message("product.verified_product_before"),
+			http.StatusBadRequest,
+		)
 	}
 	product.ConfirmedBy = admin
 	product.IsConfirmed = true
@@ -115,11 +134,14 @@ func (productService ProductService) ConfirmProductByAdmin(adminId uint, product
 	productService.emailService.SendEmail(
 		pkgemaildto.NewSendEmailDto(
 			product.Vendor.Email,
-			"Your Product Verified",
-			fmt.Sprintf("Product (%s) With ID %d Verified At %v",
-				product.Name,
-				product.ID,
-				product.ConfirmedAt.Format("2006-01-02 15:04:05"),
+			productService.translation.Message("product.verify_product_subject_email"),
+			productService.translation.MessageWithArgs(
+				"product.verify_product_body_email",
+				map[string]any{
+					"Name": product.Name,
+					"ID":   product.ID,
+					"Date": product.ConfirmedAt.Format("2006-01-02 15:04:05"),
+				},
 			),
 		),
 	)
@@ -136,7 +158,7 @@ func (productService ProductService) FindProductById(id uint) (*productentity.Pr
 	}
 	if product == nil {
 		return nil, types.NewClientError(
-			"product is not found",
+			productService.translation.Message("product.product_not_found_id"),
 			http.StatusNotFound,
 		)
 	}
@@ -167,7 +189,10 @@ func (productService ProductService) DeleteProductById(productId, userId uint) e
 		return productErr
 	}
 	if product.Vendor.ID != userId {
-		return types.NewClientError("only creator of product can delete it", http.StatusForbidden)
+		return types.NewClientError(
+			productService.translation.Message("product.owner_delete_error"),
+			http.StatusForbidden,
+		)
 	}
 	if deleteErr := productService.productRepo.DeleteProductById(product.ID); deleteErr != nil {
 		return types.NewServerError(
@@ -184,7 +209,10 @@ func (productService ProductService) UploadProductImages(productId, ownerId uint
 		return nil, productErr
 	}
 	if product.Vendor.ID != ownerId {
-		return nil, types.NewClientError("only the owner of product can upload images", http.StatusForbidden)
+		return nil, types.NewClientError(
+			productService.translation.Message("product.owner_upload_image_error"),
+			http.StatusForbidden,
+		)
 	}
 
 	outputFilenames := []string{}

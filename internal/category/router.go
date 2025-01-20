@@ -6,22 +6,25 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type CategoryRouter struct {
 	apiRouter       *echo.Group
 	config          config.MainConfig
 	categoryHandler CategoryHandler
+	translation     translations.ITranslation
 }
 
 func NewCategoryRouter(
 	apiRouter *echo.Group,
 	config config.MainConfig,
 	categoryService categoryservice.ICategoryService,
+	translation translations.ITranslation,
 ) CategoryRouter {
 	return CategoryRouter{
 		apiRouter:       apiRouter,
-		categoryHandler: NewCategoryHandler(categoryService),
+		categoryHandler: NewCategoryHandler(categoryService, translation),
 		config:          config,
 	}
 }
