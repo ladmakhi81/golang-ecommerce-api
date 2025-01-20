@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	authdto "github.com/ladmakhi81/golang-ecommerce-api/internal/auth/dto"
 	authservice "github.com/ladmakhi81/golang-ecommerce-api/internal/auth/service"
+	responsehandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/response_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 )
 
@@ -27,16 +28,14 @@ func (handler AuthHandler) Signup(c echo.Context) error {
 	if err := c.Validate(reqBody); err != nil {
 		return err
 	}
-	res, err := handler.AuthService.Signup(reqBody)
+	token, err := handler.AuthService.Signup(reqBody)
 	if err != nil {
 		return err
 	}
-	c.JSON(
+	responsehandling.ResponseJSON(
+		c,
 		http.StatusCreated,
-		map[string]any{
-			"success": true,
-			"data":    res,
-		},
+		token,
 	)
 	return nil
 }
@@ -49,16 +48,14 @@ func (handler AuthHandler) Login(c echo.Context) error {
 	if err := c.Validate(reqBody); err != nil {
 		return err
 	}
-	res, err := handler.AuthService.Login(reqBody)
+	token, err := handler.AuthService.Login(reqBody)
 	if err != nil {
 		return err
 	}
-	c.JSON(
+	responsehandling.ResponseJSON(
+		c,
 		http.StatusOK,
-		map[string]any{
-			"success": true,
-			"data":    res,
-		},
+		token,
 	)
 	return nil
 }

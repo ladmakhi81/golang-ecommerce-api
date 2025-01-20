@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	responsehandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/response_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 	userdto "github.com/ladmakhi81/golang-ecommerce-api/internal/user/dto"
@@ -37,7 +38,11 @@ func (userHandler UserHandler) VerifyAccountByAdmin(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	c.JSON(http.StatusOK, map[string]string{"message": "verify successfully ..."})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		nil,
+	)
 	return nil
 }
 func (userHandler UserHandler) CompleteProfile(c echo.Context) error {
@@ -53,10 +58,11 @@ func (userHandler UserHandler) CompleteProfile(c echo.Context) error {
 	if updateUserErr != nil {
 		return updateUserErr
 	}
-	c.JSON(http.StatusOK, map[string]any{
-		"data":    map[string]string{"message": "profile completed"},
-		"success": true,
-	})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		nil,
+	)
 	return nil
 }
 func (userHandler UserHandler) CreateUserAddress(c echo.Context) error {
@@ -72,7 +78,11 @@ func (userHandler UserHandler) CreateUserAddress(c echo.Context) error {
 	if createdAddressErr != nil {
 		return createdAddressErr
 	}
-	c.JSON(http.StatusCreated, map[string]any{"success": true, "data": createdAddress})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusCreated,
+		createdAddress,
+	)
 	return nil
 }
 func (userHandler UserHandler) GetUserAddresses(c echo.Context) error {
@@ -81,7 +91,11 @@ func (userHandler UserHandler) GetUserAddresses(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	c.JSON(http.StatusOK, map[string]any{"data": addresses})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		addresses,
+	)
 	return nil
 }
 func (userHandler UserHandler) AssignActiveAddressUser(c echo.Context) error {
@@ -96,9 +110,10 @@ func (userHandler UserHandler) AssignActiveAddressUser(c echo.Context) error {
 	if err := userHandler.userAddressService.AssignUserAddress(auth.ID, reqBody); err != nil {
 		return err
 	}
-	c.JSON(http.StatusOK, map[string]any{
-		"message": "address assigned successfully",
-		"success": true,
-	})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		nil,
+	)
 	return nil
 }
