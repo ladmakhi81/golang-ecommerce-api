@@ -1,6 +1,8 @@
 package productservice
 
 import (
+	"mime/multipart"
+
 	productdto "github.com/ladmakhi81/golang-ecommerce-api/internal/product/dto"
 	productentity "github.com/ladmakhi81/golang-ecommerce-api/internal/product/entity"
 )
@@ -11,4 +13,5 @@ type IProductService interface {
 	FindProductById(id uint) (*productentity.Product, error)
 	GetProductsPage(page, limit uint) ([]*productentity.Product, error)
 	DeleteProductById(productId, userId uint) error
+	UploadProductImages(productId uint, ownerId uint, multipartForms *multipart.Form) ([]string, error)
 }

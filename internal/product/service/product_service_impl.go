@@ -2,7 +2,13 @@ package productservice
 
 import (
 	"fmt"
+	"io"
+	"math/rand"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path"
+	"path/filepath"
 	"time"
 
 	categoryservice "github.com/ladmakhi81/golang-ecommerce-api/internal/category/service"
@@ -41,7 +47,6 @@ func (productService ProductService) CreateProduct(reqBody productdto.CreateProd
 	if vendorErr != nil {
 		return nil, vendorErr
 	}
-	fmt.Println(vendor)
 	// TODO: move this verification logic into separate middleware
 	if !vendor.IsVerified {
 		return nil, types.NewClientError(
@@ -164,4 +169,54 @@ func (productService ProductService) DeleteProductById(productId, userId uint) e
 		)
 	}
 	return nil
+}
+func (productService ProductService) UploadProductImages(productId, ownerId uint, multipartForms *multipart.Form) ([]string, error) {
+	product, productErr := productService.FindProductById(productId)
+	if productErr != nil {
+		return nil, productErr
+	}
+	if product.Vendor.ID != ownerId {
+		return nil, types.NewClientError("only the owner of product can upload images", http.StatusForbidden)
+	}
+
+	outputFilenames := []string{}
+	for _, fileHeader := range multipartForms.File["images"] {
+		inputFile, inputFileErr := fileHeader.Open()
+		if inputFileErr != nil {
+			return nil, types.NewServerError(
+				"error in reading input file",
+				"ProductService.UploadProductImages.Open",
+				inputFileErr,
+			)
+		}
+		fileExtname := filepath.Ext(fileHeader.Filename)
+		filename := fmt.Sprintf("%d-%d%s", rand.Intn(10000000000), time.Now().Unix(), fileExtname)
+		outputDestination := path.Join("./uploads/", filename)
+		outputFile, outputFileErr := os.Create(outputDestination)
+		if outputFileErr != nil {
+			return nil, types.NewServerError(
+				"error in creating output file",
+				"ProductService.UploadProductImages.Create",
+				outputFileErr,
+			)
+		}
+		if _, copyErr := io.Copy(outputFile, inputFile); copyErr != nil {
+			return nil, types.NewServerError(
+				"error in copy the input file into output file",
+				"ProductService.UploadProductImages.Copy",
+				copyErr,
+			)
+		}
+		outputFilenames = append(outputFilenames, filename)
+		inputFile.Close()
+	}
+	product.Images = outputFilenames
+	if updateErr := productService.productRepo.UpdateProductById(product); updateErr != nil {
+		return nil, types.NewServerError(
+			"error in updating product",
+			"ProductService.ProductRepo.UpdateProductById",
+			updateErr,
+		)
+	}
+	return outputFilenames, nil
 }

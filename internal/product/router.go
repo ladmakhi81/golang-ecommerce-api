@@ -33,68 +33,46 @@ func NewProductRouter(
 
 func (productRouter ProductRouter) SetupRouter() {
 	productsApi := productRouter.apiRouter.Group("/products")
+	productsApi.Use(
+		middlewares.AuthMiddleware(
+			productRouter.config.SecretKey,
+		),
+	)
 
 	productsApi.POST(
 		"",
 		productRouter.productHandler.CreateProduct,
-		middlewares.AuthMiddleware(
-			productRouter.config.SecretKey,
-		),
 	)
-
 	productsApi.PATCH(
 		"/:id",
 		productRouter.productHandler.ConfirmProductByAdmin,
-		middlewares.AuthMiddleware(
-			productRouter.config.SecretKey,
-		),
 	)
-
 	productsApi.GET(
 		"/prices/:productId",
 		productRouter.productHandler.GetPricesOfProduct,
-		middlewares.AuthMiddleware(
-			productRouter.config.SecretKey,
-		),
 	)
-
 	productsApi.GET(
 		"/:id",
 		productRouter.productHandler.FindProductDetailById,
-		middlewares.AuthMiddleware(
-			productRouter.config.SecretKey,
-		),
 	)
-
 	productsApi.GET(
 		"",
 		productRouter.productHandler.GetProductsPage,
-		middlewares.AuthMiddleware(
-			productRouter.config.SecretKey,
-		),
 	)
-
 	productsApi.DELETE(
 		"/:id",
 		productRouter.productHandler.DeleteProductById,
-		middlewares.AuthMiddleware(
-			productRouter.config.SecretKey,
-		),
 	)
-
 	productsApi.POST(
 		"/price/:product_id",
 		productRouter.productHandler.AddPriceToProductPriceList,
-		middlewares.AuthMiddleware(
-			productRouter.config.SecretKey,
-		),
 	)
-
 	productsApi.DELETE(
 		"/price/:id",
 		productRouter.productHandler.DeletePriceItem,
-		middlewares.AuthMiddleware(
-			productRouter.config.SecretKey,
-		),
+	)
+	productsApi.PATCH(
+		"/images/:id",
+		productRouter.productHandler.UploadProductImages,
 	)
 }

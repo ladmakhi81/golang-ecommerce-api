@@ -20,6 +20,7 @@ type Product struct {
 	ConfirmedAt   time.Time                 `json:"confirmedAt,omitempty"`
 	ProductPrices []*ProductPrice           `json:"productPrices,omitempty"`
 	Fee           float32                   `json:"fee,omitempty"`
+	Images        []string                  `json:"images,omitempty"`
 
 	entity.BaseEntity
 }

@@ -56,8 +56,9 @@ func (productRepo ProductRepository) UpdateProductById(product *productentity.Pr
 			is_confirmed = $4,
 			confirmed_by_id = $5,
 			confirmed_at = $6,
-			fee = $7
-		WHERE id = $8
+			fee = $7,
+			images = $8
+		WHERE id = $9
 	`
 	var confirmedById *uint
 	if product.ConfirmedBy != nil {
@@ -72,6 +73,7 @@ func (productRepo ProductRepository) UpdateProductById(product *productentity.Pr
 		confirmedById,
 		product.ConfirmedAt,
 		product.Fee,
+		pq.Array(product.Images),
 		product.ID,
 	)
 	return row.Err()
@@ -79,7 +81,7 @@ func (productRepo ProductRepository) UpdateProductById(product *productentity.Pr
 func (productRepo ProductRepository) FindProductById(id uint) (*productentity.Product, error) {
 	command := `
 		SELECT
-			p.id, p.fee, p.name, p.description,
+			p.id, p.fee, p.name, p.description, p.images,
 			p.base_price, p.tags, p.is_confirmed, p.confirmed_at, p.created_at, p.updated_at,
 			uc.id, uc.full_name, uc.email,
 			c.id, c.name, c.icon, c.created_at, c.updated_at,
@@ -100,6 +102,7 @@ func (productRepo ProductRepository) FindProductById(id uint) (*productentity.Pr
 	product.Vendor = new(userentity.User)
 
 	var tags []byte
+	var images []byte
 	var confirmedAt sql.NullTime
 	var confirmedByEmail, confirmedByFullName sql.NullString
 	var confirmedById sql.NullInt16
@@ -109,6 +112,7 @@ func (productRepo ProductRepository) FindProductById(id uint) (*productentity.Pr
 		&product.Fee,
 		&product.Name,
 		&product.Description,
+		&images,
 		&product.BasePrice,
 		&tags,
 		&product.IsConfirmed,
@@ -136,6 +140,9 @@ func (productRepo ProductRepository) FindProductById(id uint) (*productentity.Pr
 	if len(tags) > 0 {
 		pq.Array(&product.Tags).Scan(tags)
 	}
+	if len(images) > 0 {
+		pq.Array(&product.Images).Scan(images)
+	}
 	if confirmedByEmail.Valid {
 		product.ConfirmedBy.Email = confirmedByEmail.String
 	}
@@ -153,7 +160,7 @@ func (productRepo ProductRepository) FindProductById(id uint) (*productentity.Pr
 func (productRepo ProductRepository) FindProductsPage(page, limit uint) ([]*productentity.Product, error) {
 	command := `
 		SELECT
-			p.id, p.fee, p.name, p.description,
+			p.id, p.fee, p.name, p.description, p.images,
 			p.base_price, p.tags, p.is_confirmed, p.confirmed_at, p.created_at, p.updated_at,
 			uc.id, uc.full_name, uc.email,
 			c.id, c.name, c.icon, c.created_at, c.updated_at,
@@ -178,6 +185,7 @@ func (productRepo ProductRepository) FindProductsPage(page, limit uint) ([]*prod
 		product.Vendor = new(userentity.User)
 
 		var tags []byte
+		var images []byte
 		var confirmedAt sql.NullTime
 		var confirmedByEmail, confirmedByFullName sql.NullString
 		var confirmedById sql.NullInt16
@@ -187,6 +195,7 @@ func (productRepo ProductRepository) FindProductsPage(page, limit uint) ([]*prod
 			&product.Fee,
 			&product.Name,
 			&product.Description,
+			&images,
 			&product.BasePrice,
 			&tags,
 			&product.IsConfirmed,
@@ -210,6 +219,9 @@ func (productRepo ProductRepository) FindProductsPage(page, limit uint) ([]*prod
 		}
 		if len(tags) > 0 {
 			pq.Array(&product.Tags).Scan(tags)
+		}
+		if len(images) > 0 {
+			pq.Array(&product.Images).Scan(images)
 		}
 		if confirmedByEmail.Valid {
 			product.ConfirmedBy.Email = confirmedByEmail.String

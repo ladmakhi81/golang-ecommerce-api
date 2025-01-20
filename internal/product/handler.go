@@ -158,3 +158,24 @@ func (productHandler ProductHandler) GetPricesOfProduct(c echo.Context) error {
 	c.JSON(http.StatusOK, map[string]any{"prices": prices})
 	return nil
 }
+func (productHandler ProductHandler) UploadProductImages(c echo.Context) error {
+	ownerId := c.Get("AuthClaim").(*types.AuthClaim).ID
+	productId, parsedProductIdErr := productHandler.util.NumericParamConvertor(c.Param("id"), "invalid product id")
+	if parsedProductIdErr != nil {
+		return parsedProductIdErr
+	}
+	multipartForm, multipartFormErr := c.MultipartForm()
+	if multipartFormErr != nil {
+		return types.NewServerError(
+			"error in receiving multipart formdata",
+			"ProductHandler.UploadProductImages.MultipartForm",
+			multipartFormErr,
+		)
+	}
+	uploadedFileNames, uploadErr := productHandler.productService.UploadProductImages(productId, ownerId, multipartForm)
+	if uploadErr != nil {
+		return uploadErr
+	}
+	c.JSON(http.StatusOK, map[string]any{"success": true, "data": uploadedFileNames})
+	return nil
+}
