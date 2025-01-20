@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	categorydto "github.com/ladmakhi81/golang-ecommerce-api/internal/category/dto"
 	categoryservice "github.com/ladmakhi81/golang-ecommerce-api/internal/category/service"
+	responsehandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/response_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 )
@@ -36,10 +37,11 @@ func (categoryHandler CategoryHandler) CreateCategory(c echo.Context) error {
 	if createdCategoryErr != nil {
 		return createdCategoryErr
 	}
-	c.JSON(http.StatusCreated, map[string]any{
-		"category": createdCategory,
-		"success":  true,
-	})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusCreated,
+		createdCategory,
+	)
 	return nil
 }
 func (categoryHandler CategoryHandler) GetCategoriesTree(c echo.Context) error {
@@ -47,9 +49,11 @@ func (categoryHandler CategoryHandler) GetCategoriesTree(c echo.Context) error {
 	if categoriesErr != nil {
 		return categoriesErr
 	}
-	c.JSON(http.StatusOK, map[string]any{
-		"data": categories,
-	})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		categories,
+	)
 	return nil
 }
 func (categoryHandler CategoryHandler) GetCategoriesPage(c echo.Context) error {
@@ -58,9 +62,11 @@ func (categoryHandler CategoryHandler) GetCategoriesPage(c echo.Context) error {
 	if categoriesErr != nil {
 		return categoriesErr
 	}
-	c.JSON(http.StatusOK, map[string]any{
-		"data": categories,
-	})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		categories,
+	)
 	return nil
 }
 func (categoryHandler CategoryHandler) DeleteCategoryById(c echo.Context) error {
@@ -72,9 +78,11 @@ func (categoryHandler CategoryHandler) DeleteCategoryById(c echo.Context) error 
 	if deleteErr != nil {
 		return deleteErr
 	}
-	c.JSON(http.StatusOK, map[string]any{
-		"message": "delete successfully",
-	})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		nil,
+	)
 	return nil
 }
 func (categoryHandler CategoryHandler) UploadCategoryIcon(c echo.Context) error {
@@ -99,6 +107,10 @@ func (categoryHandler CategoryHandler) UploadCategoryIcon(c echo.Context) error 
 	if uploadedFileErr != nil {
 		return uploadedFileErr
 	}
-	c.JSON(http.StatusOK, map[string]any{"success": true, "data": uploadedFilename})
+	responsehandling.ResponseJSON(
+		c,
+		http.StatusOK,
+		uploadedFilename,
+	)
 	return nil
 }
