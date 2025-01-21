@@ -125,8 +125,8 @@ func (paymentService PaymentService) VerifyPayment(customerId uint, reqBody paym
 		)
 		paymentService.eventsContainer.PublishEvent(
 			events.NewEvent(
-				events.PAYED_ORDER_EVENT,
-				events.NewPayedOrderEventBody(payment.Order.ID),
+				events.CHANGED_ORDER_STATUS_EVENT,
+				events.NewChangeOrderStatusEventBody(payment.Order, payment.Customer),
 			),
 		)
 

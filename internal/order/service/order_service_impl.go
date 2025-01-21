@@ -12,8 +12,6 @@ import (
 	paymentservice "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/service"
 	productservice "github.com/ladmakhi81/golang-ecommerce-api/internal/product/service"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
-	pkgemaildto "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/dto"
-	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
@@ -23,7 +21,6 @@ type OrderService struct {
 	cartService        cartservice.ICartService
 	productService     productservice.IProductService
 	paymentService     paymentservice.IPaymentService
-	emailService       pkgemail.IEmailService
 	userAddressService userservice.IUserAddressService
 	translation        translations.ITranslation
 }
@@ -34,7 +31,6 @@ func NewOrderService(
 	cartService cartservice.ICartService,
 	productService productservice.IProductService,
 	paymentService paymentservice.IPaymentService,
-	emailService pkgemail.IEmailService,
 	userAddressService userservice.IUserAddressService,
 	translation translations.ITranslation,
 ) OrderService {
@@ -44,7 +40,6 @@ func NewOrderService(
 		cartService:        cartService,
 		productService:     productService,
 		paymentService:     paymentService,
-		emailService:       emailService,
 		userAddressService: userAddressService,
 		translation:        translation,
 	}
@@ -174,20 +169,6 @@ func (orderService OrderService) ChangeOrderStatus(orderId uint, reqBody orderdt
 			updateErr,
 		)
 	}
-	orderService.emailService.SendEmail(
-		pkgemaildto.NewSendEmailDto(
-			order.Customer.Email,
-			orderService.translation.Message("order.order_status_update_subject_email"),
-			orderService.translation.MessageWithArgs(
-				"order.order_status_update_body_email",
-				map[string]any{
-					"ID":     order.ID,
-					"Status": order.Status,
-					"Date":   order.StatusChangedAt.Format("2006-01-02 15:04:05"),
-				},
-			),
-		),
-	)
 	return nil
 }
 func (orderService OrderService) FindOrdersPage(page, limit uint) ([]*orderentity.Order, uint, error) {

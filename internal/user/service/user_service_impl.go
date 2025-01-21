@@ -5,30 +5,29 @@ import (
 	"time"
 
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/events"
 	userdto "github.com/ladmakhi81/golang-ecommerce-api/internal/user/dto"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 	userrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/user/repository"
-	pkgemaildto "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/dto"
-	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
-	userRepo     userrepository.IUserRepository
-	emailService pkgemail.IEmailService
-	translation  translations.ITranslation
+	userRepo        userrepository.IUserRepository
+	translation     translations.ITranslation
+	eventsContainer *events.EventsContainer
 }
 
 func NewUserService(
 	userRepo userrepository.IUserRepository,
-	emailService pkgemail.IEmailService,
 	translation translations.ITranslation,
+	eventsContainer *events.EventsContainer,
 ) UserService {
 	return UserService{
-		userRepo:     userRepo,
-		emailService: emailService,
-		translation:  translation,
+		userRepo:        userRepo,
+		translation:     translation,
+		eventsContainer: eventsContainer,
 	}
 }
 
@@ -140,11 +139,10 @@ func (userService UserService) CompleteProfile(userId uint, data *userdto.Comple
 			updateErr,
 		)
 	}
-	userService.emailService.SendEmail(
-		pkgemaildto.NewSendEmailDto(
-			user.Email,
-			userService.translation.Message("user.complete_profile_subject_email"),
-			userService.translation.Message("user.complete_profile_body_email"),
+	userService.eventsContainer.PublishEvent(
+		events.NewEvent(
+			events.USER_COMPLETE_PROFILE_EVENT,
+			events.NewUserCompleteProfileEventBody(user.Email),
 		),
 	)
 	return user, nil
@@ -174,22 +172,15 @@ func (userService UserService) VerifyAccountByAdmin(adminId uint, vendorId uint)
 			verificationErr,
 		)
 	}
-
-	userService.emailService.SendEmail(
-		pkgemaildto.NewSendEmailDto(
-			admin.Email,
-			userService.translation.Message("admin_verify_account_subject_email"),
-			userService.translation.MessageWithArgs("admin_verify_account_body_email", map[string]any{
-				"Name": vendor.FullName,
-				"Date": time.Now().Format("2006-01-02 15:04:05"),
-			}),
-		),
-	)
-	userService.emailService.SendEmail(
-		pkgemaildto.NewSendEmailDto(
-			vendor.Email,
-			userService.translation.Message("user_verify_account_subject_email"),
-			userService.translation.Message("user_verify_account_body_email"),
+	userService.eventsContainer.PublishEvent(
+		events.NewEvent(
+			events.USER_VERIFIED_EVENT,
+			events.NewUserVerificationEventBody(
+				admin.Email,
+				vendor.Email,
+				vendor.FullName,
+				time.Now(),
+			),
 		),
 	)
 	return nil

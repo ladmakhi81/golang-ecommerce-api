@@ -26,12 +26,14 @@ import (
 	paymentrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/repository"
 	paymentservice "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/product"
+	productevent "github.com/ladmakhi81/golang-ecommerce-api/internal/product/event"
 	productrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/product/repository"
 	productservice "github.com/ladmakhi81/golang-ecommerce-api/internal/product/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/transaction"
 	transactionrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/repository"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/user"
+	userevent "github.com/ladmakhi81/golang-ecommerce-api/internal/user/event"
 	userrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/user/repository"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
 	vendorincomeevent "github.com/ladmakhi81/golang-ecommerce-api/internal/vendor_income/event"
@@ -90,25 +92,43 @@ func main() {
 	zarinpalService := pkgzarinpalservice.NewZarinpalService(mainConfig)
 	emailService := pkgemail.NewEmailService(mainConfig)
 	jwtService := authservice.NewJwtService(mainConfig)
-	userService := userservice.NewUserService(userRepo, emailService, translation)
-	authService := authservice.NewAuthService(userService, jwtService, emailService, translation)
+	userService := userservice.NewUserService(userRepo, translation, &eventContainer)
+	authService := authservice.NewAuthService(userService, jwtService, translation, &eventContainer)
 	categoryService := categoryservice.NewCategoryService(categoryRepo, mainConfig, translation)
 	transactionService := transactionservice.NewTransactionService(transactionRepo)
-	productService := productservice.NewProductService(userService, categoryService, productRepo, emailService, translation)
-	productPriceService := productservice.NewProductPriceService(productService, productPriceRepo, translation)
+	productService := productservice.NewProductService(
+		userService,
+		categoryService,
+		productRepo,
+		translation,
+		&eventContainer,
+	)
+	productPriceService := productservice.NewProductPriceService(
+		productService,
+		productPriceRepo,
+		translation,
+	)
 	cartService := cartservice.NewCartService(cartRepo, productService, productPriceService, userService, translation)
 	paymentService := paymentservice.NewPaymentService(paymentRepo, zarinpalService, transactionService, &eventContainer, translation)
 	userAddressService := userservice.NewUserAddressService(userAddressRepo, userService, translation)
-	orderService := orderservice.NewOrderService(userService, orderRepo, cartService, productService, paymentService, emailService, userAddressService, translation)
+	orderService := orderservice.NewOrderService(userService, orderRepo, cartService, productService, paymentService, userAddressService, translation)
 	vendorIncomeService := vendorincomeservice.NewVendorIncomeService(vendorIncomeRepo, orderService, transactionService)
 
 	// event subscribers
 	vendorIncomeEventSubscriber := vendorincomeevent.NewVendorIncomeEventsSubscriber(vendorIncomeService)
-	orderEventSubscriber := orderevent.NewOrderEventsSubscriber(orderService)
+	orderEventSubscriber := orderevent.NewOrderEventsSubscriber(orderService, emailService, translation)
+	userEventSubscriber := userevent.NewUserEventsSubscriber(emailService, translation)
+	productEventSubscriber := productevent.NewProductEventsSubscriber(emailService, translation)
 
 	// event containers
 	vendorIncomeEventContainer := vendorincomeevent.NewVendorIncomeEventsContainer(&eventContainer, vendorIncomeEventSubscriber)
 	vendorIncomeEventContainer.RegisterEvents()
+
+	productEventContainer := productevent.NewProductEventsContainer(&eventContainer, productEventSubscriber)
+	productEventContainer.RegisterEvents()
+
+	userEventContainer := userevent.NewUserEventsContainer(&eventContainer, userEventSubscriber)
+	userEventContainer.RegisterEvents()
 
 	orderEventContainer := orderevent.NewOrderEventsContainer(&eventContainer, orderEventSubscriber)
 	orderEventContainer.RegisterEvents()

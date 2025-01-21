@@ -21,7 +21,7 @@ func NewOrderEventsContainer(
 
 func (container *OrderEventsContainer) RegisterEvents() {
 	container.eventContainer.RegisterEvent(
-		events.PAYED_ORDER_EVENT,
-		container.orderEventsSubscriber.SubscribeChangeStatusOfOrderToPayed,
+		events.CHANGED_ORDER_STATUS_EVENT,
+		container.orderEventsSubscriber.SubscribeChangeOrderStatus,
 	)
 }

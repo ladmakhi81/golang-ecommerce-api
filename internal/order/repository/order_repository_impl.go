@@ -73,8 +73,8 @@ func (orderRepo OrderRepository) FindOrderItemsByOrderId(orderId uint) ([]*order
 		FROM _order_items i
 			INNER JOIN _products p ON p.id = i.product_id
 			INNER JOIN _product_prices pp ON pp.id = i.price_item_id
-			INNER JOIN _users u ON u.id = i.vendor_id
-			INNER JOIN _users uu ON uu.id = i.customer_id
+			INNER JOIN _users u ON u.id = i.customer_id
+			INNER JOIN _users uu ON uu.id = i.vendor_id
 			INNER JOIN _orders o ON o.id = i.order_id
 		WHERE order_id = $1
 	`

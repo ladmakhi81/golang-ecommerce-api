@@ -13,12 +13,11 @@ import (
 
 	categoryservice "github.com/ladmakhi81/golang-ecommerce-api/internal/category/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/events"
 	productdto "github.com/ladmakhi81/golang-ecommerce-api/internal/product/dto"
 	productentity "github.com/ladmakhi81/golang-ecommerce-api/internal/product/entity"
 	productrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/product/repository"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
-	pkgemaildto "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/dto"
-	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
@@ -26,23 +25,23 @@ type ProductService struct {
 	userService     userservice.IUserService
 	categoryService categoryservice.ICategoryService
 	productRepo     productrepository.IProductRepository
-	emailService    pkgemail.IEmailService
 	translation     translations.ITranslation
+	eventsContainer *events.EventsContainer
 }
 
 func NewProductService(
 	userService userservice.IUserService,
 	categoryService categoryservice.ICategoryService,
 	productRepo productrepository.IProductRepository,
-	emailService pkgemail.IEmailService,
 	translation translations.ITranslation,
+	eventsContainer *events.EventsContainer,
 ) ProductService {
 	return ProductService{
 		userService:     userService,
 		categoryService: categoryService,
 		productRepo:     productRepo,
-		emailService:    emailService,
 		translation:     translation,
+		eventsContainer: eventsContainer,
 	}
 }
 
@@ -80,21 +79,10 @@ func (productService ProductService) CreateProduct(reqBody productdto.CreateProd
 			createProductErr,
 		)
 	}
-	productService.emailService.SendEmail(
-		pkgemaildto.NewSendEmailDto(
-			product.Vendor.Email,
-			productService.translation.MessageWithArgs(
-				"product.vendor_product_create_subject_email",
-				map[string]any{"ProductName": product.Name},
-			),
-			productService.translation.MessageWithArgs(
-				"product.vendor_product_create_body_email",
-				map[string]any{
-					"Name": product.Name,
-					"ID":   product.ID,
-					"Date": product.CreatedAt.Format("2006-01-02 15:04:05"),
-				},
-			),
+	productService.eventsContainer.PublishEvent(
+		events.NewEvent(
+			events.PRODUCT_CREATED_EVENT,
+			events.NewProductCreatedEventBody(product),
 		),
 	)
 	return product, nil
@@ -131,20 +119,13 @@ func (productService ProductService) ConfirmProductByAdmin(adminId uint, product
 			updateErr,
 		)
 	}
-	productService.emailService.SendEmail(
-		pkgemaildto.NewSendEmailDto(
-			product.Vendor.Email,
-			productService.translation.Message("product.verify_product_subject_email"),
-			productService.translation.MessageWithArgs(
-				"product.verify_product_body_email",
-				map[string]any{
-					"Name": product.Name,
-					"ID":   product.ID,
-					"Date": product.ConfirmedAt.Format("2006-01-02 15:04:05"),
-				},
-			),
+	productService.eventsContainer.PublishEvent(
+		events.NewEvent(
+			events.PRODUCT_VERIFIED_EVENT,
+			events.NewProductVerifiedEventBody(product),
 		),
 	)
+
 	return nil
 }
 func (productService ProductService) FindProductById(id uint) (*productentity.Product, error) {

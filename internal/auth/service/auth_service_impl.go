@@ -5,31 +5,30 @@ import (
 
 	authdto "github.com/ladmakhi81/golang-ecommerce-api/internal/auth/dto"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/events"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
-	pkgemaildto "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/dto"
-	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type AuthService struct {
-	userService  userservice.IUserService
-	jwtService   IJwtService
-	emailService pkgemail.IEmailService
-	translation  translations.ITranslation
+	userService     userservice.IUserService
+	jwtService      IJwtService
+	translation     translations.ITranslation
+	eventsContainer *events.EventsContainer
 }
 
 func NewAuthService(
 	userService userservice.IUserService,
 	jwtService IJwtService,
-	emailService pkgemail.IEmailService,
 	translation translations.ITranslation,
+	eventsContainer *events.EventsContainer,
 ) AuthService {
 	return AuthService{
-		userService:  userService,
-		jwtService:   jwtService,
-		emailService: emailService,
-		translation:  translation,
+		userService:     userService,
+		jwtService:      jwtService,
+		translation:     translation,
+		eventsContainer: eventsContainer,
 	}
 }
 
@@ -52,11 +51,10 @@ func (authService AuthService) Signup(reqBody authdto.SignupReqBody) (*authdto.S
 			generatedAccessTokenErr,
 		)
 	}
-	authService.emailService.SendEmail(
-		pkgemaildto.NewSendEmailDto(
-			createdUser.Email,
-			authService.translation.Message("auth.signup_subject_email"),
-			authService.translation.Message("auth.signup_body_email"),
+	authService.eventsContainer.PublishEvent(
+		events.NewEvent(
+			events.USER_REGISTERED_EVENT,
+			events.NewUserRegisteredEventBody(createdUser.Email),
 		),
 	)
 	return authdto.NewSignupResponse(generatedAccessToken), nil
