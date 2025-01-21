@@ -23,7 +23,7 @@ func NewUserService(
 	userRepo userrepository.IUserRepository,
 	translation translations.ITranslation,
 	eventsContainer *events.EventsContainer,
-) UserService {
+) IUserService {
 	return UserService{
 		userRepo:        userRepo,
 		translation:     translation,

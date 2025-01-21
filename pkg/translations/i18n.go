@@ -12,7 +12,7 @@ type Translation struct {
 	localizer i18n.Localizer
 }
 
-func NewTranslation() Translation {
+func NewTranslation() ITranslation {
 	translation := Translation{}
 
 	bundle := i18n.NewBundle(language.Persian)

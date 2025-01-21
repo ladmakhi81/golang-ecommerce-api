@@ -1,32 +1,25 @@
 package auth
 
-import (
-	"github.com/labstack/echo/v4"
-	authservice "github.com/ladmakhi81/golang-ecommerce-api/internal/auth/service"
-	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
-)
+import "github.com/labstack/echo/v4"
 
 type AuthRouter struct {
-	apiRoute    *echo.Group
-	handler     AuthHandler
-	authService authservice.IAuthService
-	translation translations.ITranslation
+	handler AuthHandler
+	baseApi *echo.Group
 }
 
-func NewAuthRouter(
-	apiRoute *echo.Group,
-	authService authservice.IAuthService,
-	translation translations.ITranslation,
-) AuthRouter {
+func NewAuthRouter(authHandler AuthHandler) AuthRouter {
 	return AuthRouter{
-		apiRoute: apiRoute,
-		handler:  NewAuthHandler(authService, translation),
+		handler: authHandler,
 	}
 }
 
-func (router AuthRouter) SetupRouter() {
-	authRouter := router.apiRoute.Group("/auth")
+func (authRouter *AuthRouter) SetBaseApi(baseApi *echo.Group) {
+	authRouter.baseApi = baseApi
+}
 
-	authRouter.POST("/signup", router.handler.Signup)
-	authRouter.POST("/login", router.handler.Login)
+func (authRouter AuthRouter) RegisterRoutes() {
+	authApi := authRouter.baseApi.Group("/auth")
+
+	authApi.POST("/signup", authRouter.handler.Signup)
+	authApi.POST("/login", authRouter.handler.Login)
 }

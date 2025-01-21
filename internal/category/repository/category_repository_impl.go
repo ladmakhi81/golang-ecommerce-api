@@ -11,7 +11,7 @@ type CategoryRepository struct {
 	storage *storage.Storage
 }
 
-func NewCategoryRepository(storage *storage.Storage) CategoryRepository {
+func NewCategoryRepository(storage *storage.Storage) ICategoryRepository {
 	return CategoryRepository{
 		storage,
 	}

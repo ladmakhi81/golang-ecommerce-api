@@ -11,16 +11,16 @@ import (
 )
 
 type ProductPriceService struct {
-	productService   ProductService
+	productService   IProductService
 	productPriceRepo productrepository.IProductPriceRepository
 	translation      translations.ITranslation
 }
 
 func NewProductPriceService(
-	productService ProductService,
+	productService IProductService,
 	productPriceRepo productrepository.IProductPriceRepository,
 	translation translations.ITranslation,
-) ProductPriceService {
+) IProductPriceService {
 	return ProductPriceService{
 		productService:   productService,
 		productPriceRepo: productPriceRepo,

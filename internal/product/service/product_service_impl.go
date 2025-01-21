@@ -35,7 +35,7 @@ func NewProductService(
 	productRepo productrepository.IProductRepository,
 	translation translations.ITranslation,
 	eventsContainer *events.EventsContainer,
-) ProductService {
+) IProductService {
 	return ProductService{
 		userService:     userService,
 		categoryService: categoryService,

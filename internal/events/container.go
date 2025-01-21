@@ -11,6 +11,12 @@ type EventsContainer struct {
 	events map[string]chan Event
 }
 
+func NewEventsContainer2() *EventsContainer {
+	return &EventsContainer{
+		events: make(map[string]chan Event),
+	}
+}
+
 func NewEventsContainer() EventsContainer {
 	return EventsContainer{
 		events: make(map[string]chan Event),

@@ -13,7 +13,7 @@ type ProductPriceRepository struct {
 
 func NewProductPriceRepository(
 	storage *storage.Storage,
-) ProductPriceRepository {
+) IProductPriceRepository {
 	return ProductPriceRepository{
 		storage: storage,
 	}

@@ -12,7 +12,7 @@ type UserRepository struct {
 	storage *storage.Storage
 }
 
-func NewUserRepository(storage *storage.Storage) UserRepository {
+func NewUserRepository(storage *storage.Storage) IUserRepository {
 	return UserRepository{storage: storage}
 }
 

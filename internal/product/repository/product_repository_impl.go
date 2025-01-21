@@ -14,7 +14,7 @@ type ProductRepository struct {
 	storage *storage.Storage
 }
 
-func NewProductRepository(storage *storage.Storage) ProductRepository {
+func NewProductRepository(storage *storage.Storage) IProductRepository {
 	return ProductRepository{
 		storage: storage,
 	}

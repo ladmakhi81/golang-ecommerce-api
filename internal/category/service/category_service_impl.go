@@ -29,7 +29,7 @@ func NewCategoryService(
 	categoryRepo categoryrepository.ICategoryRepository,
 	config config.MainConfig,
 	translation translations.ITranslation,
-) CategoryService {
+) ICategoryService {
 	return CategoryService{
 		categoryRepo: categoryRepo,
 		config:       config,

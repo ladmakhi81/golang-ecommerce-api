@@ -2,35 +2,33 @@ package category
 
 import (
 	"github.com/labstack/echo/v4"
-	categoryservice "github.com/ladmakhi81/golang-ecommerce-api/internal/category/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
-	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type CategoryRouter struct {
-	apiRouter       *echo.Group
-	config          config.MainConfig
-	categoryHandler CategoryHandler
-	translation     translations.ITranslation
+	baseApi *echo.Group
+	handler CategoryHandler
+	config  config.MainConfig
 }
 
 func NewCategoryRouter(
-	apiRouter *echo.Group,
+	handler CategoryHandler,
 	config config.MainConfig,
-	categoryService categoryservice.ICategoryService,
-	translation translations.ITranslation,
 ) CategoryRouter {
 	return CategoryRouter{
-		apiRouter:       apiRouter,
-		categoryHandler: NewCategoryHandler(categoryService, translation),
-		config:          config,
+		handler: handler,
+		config:  config,
 	}
 }
 
-func (categoryRouter CategoryRouter) SetupRouter() {
-	categoriesApi := categoryRouter.apiRouter.Group("/categories")
+func (userRouter *CategoryRouter) SetBaseApi(baseApi *echo.Group) {
+	userRouter.baseApi = baseApi
+}
+
+func (categoryRouter CategoryRouter) RegisterRoutes() {
+	categoriesApi := categoryRouter.baseApi.Group("/categories")
 
 	categoriesApi.Use(
 		middlewares.AuthMiddleware(
@@ -40,25 +38,25 @@ func (categoryRouter CategoryRouter) SetupRouter() {
 
 	categoriesApi.POST(
 		"",
-		categoryRouter.categoryHandler.CreateCategory,
+		categoryRouter.handler.CreateCategory,
 		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 	categoriesApi.GET(
 		"",
-		categoryRouter.categoryHandler.GetCategoriesTree,
+		categoryRouter.handler.GetCategoriesTree,
 	)
 	categoriesApi.GET(
 		"/page",
-		categoryRouter.categoryHandler.GetCategoriesPage,
+		categoryRouter.handler.GetCategoriesPage,
 	)
 	categoriesApi.DELETE(
 		"/:id",
-		categoryRouter.categoryHandler.DeleteCategoryById,
+		categoryRouter.handler.DeleteCategoryById,
 		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 	categoriesApi.PATCH(
 		"/icon/:categoryId",
-		categoryRouter.categoryHandler.UploadCategoryIcon,
+		categoryRouter.handler.UploadCategoryIcon,
 		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 }

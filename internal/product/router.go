@@ -5,84 +5,80 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
-	productservice "github.com/ladmakhi81/golang-ecommerce-api/internal/product/service"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
-	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type ProductRouter struct {
-	apiRouter           *echo.Group
-	productHandler      ProductHandler
-	productService      productservice.IProductService
-	productPriceService productservice.IProductPriceService
-	util                utils.Util
-	config              config.MainConfig
-	translation         translations.ITranslation
+	baseApi *echo.Group
+	handler ProductHandler
+	util    utils.Util
+	config  config.MainConfig
 }
 
 func NewProductRouter(
-	apiRouter *echo.Group,
 	config config.MainConfig,
-	productService productservice.IProductService,
-	productPriceService productservice.IProductPriceService,
-	translation translations.ITranslation,
+	handler ProductHandler,
+	util utils.Util,
 ) ProductRouter {
 	return ProductRouter{
-		apiRouter:      apiRouter,
-		productHandler: NewProductHandler(productService, productPriceService, translation),
-		util:           utils.NewUtil(),
-		config:         config,
+		handler: handler,
+		util:    util,
+		config:  config,
 	}
 }
 
-func (productRouter ProductRouter) SetupRouter() {
-	productsApi := productRouter.apiRouter.Group("/products")
+func (productRouter *ProductRouter) SetBaseApi(baseApi *echo.Group) {
+	productRouter.baseApi = baseApi
+}
+
+func (productRouter ProductRouter) RegisterRoutes() {
+	productsApi := productRouter.baseApi.Group("/products")
+
 	productsApi.Use(
 		middlewares.AuthMiddleware(
 			productRouter.config.SecretKey,
 		),
 	)
-
 	productsApi.POST(
 		"",
-		productRouter.productHandler.CreateProduct,
+		productRouter.handler.CreateProduct,
 		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 	productsApi.PATCH(
 		"/:id",
-		productRouter.productHandler.ConfirmProductByAdmin,
+		productRouter.handler.ConfirmProductByAdmin,
 		middlewares.RoleMiddleware(userentity.AdminRole),
 	)
 	productsApi.GET(
 		"/prices/:productId",
-		productRouter.productHandler.GetPricesOfProduct,
+		productRouter.handler.GetPricesOfProduct,
 	)
 	productsApi.GET(
 		"/:id",
-		productRouter.productHandler.FindProductDetailById,
+		productRouter.handler.FindProductDetailById,
 	)
 	productsApi.GET(
 		"",
-		productRouter.productHandler.GetProductsPage,
+		productRouter.handler.GetProductsPage,
 	)
 	productsApi.DELETE(
 		"/:id",
-		productRouter.productHandler.DeleteProductById,
+		productRouter.handler.DeleteProductById,
 		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 	productsApi.POST(
 		"/price/:product_id",
-		productRouter.productHandler.AddPriceToProductPriceList,
+		productRouter.handler.AddPriceToProductPriceList,
 		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 	productsApi.DELETE(
 		"/price/:id",
-		productRouter.productHandler.DeletePriceItem,
+		productRouter.handler.DeletePriceItem,
 		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 	productsApi.PATCH(
 		"/images/:id",
-		productRouter.productHandler.UploadProductImages,
+		productRouter.handler.UploadProductImages,
 		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 }

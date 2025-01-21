@@ -5,33 +5,30 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
-	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
-	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type UserRouter struct {
-	apiRouter   *echo.Group
-	userHandler UserHandler
-	config      config.MainConfig
-	transation  translations.ITranslation
+	handler UserHandler
+	baseApi *echo.Group
+	config  config.MainConfig
 }
 
 func NewUserRouter(
-	apiRouter *echo.Group,
-	userService userservice.IUserService,
-	userAddressService userservice.IUserAddressService,
+	userHandler UserHandler,
 	config config.MainConfig,
-	transation translations.ITranslation,
 ) UserRouter {
 	return UserRouter{
-		config:      config,
-		apiRouter:   apiRouter,
-		userHandler: NewUserHandler(userService, userAddressService, transation),
+		handler: userHandler,
+		config:  config,
 	}
 }
 
-func (userRouter UserRouter) SetupRouter() {
-	usersApi := userRouter.apiRouter.Group("/users")
+func (userRouter *UserRouter) SetBaseApi(baseApi *echo.Group) {
+	userRouter.baseApi = baseApi
+}
+
+func (userRouter UserRouter) RegisterRoutes() {
+	usersApi := userRouter.baseApi.Group("/users")
 
 	usersApi.Use(
 		middlewares.AuthMiddleware(
@@ -41,28 +38,28 @@ func (userRouter UserRouter) SetupRouter() {
 
 	usersApi.PATCH(
 		"/verify-account/:id",
-		userRouter.userHandler.VerifyAccountByAdmin,
+		userRouter.handler.VerifyAccountByAdmin,
 		middlewares.RoleMiddleware(userentity.AdminRole),
 	)
 
 	usersApi.PATCH(
 		"/complete-profile",
-		userRouter.userHandler.CompleteProfile,
+		userRouter.handler.CompleteProfile,
 		middlewares.RoleMiddleware(userentity.VendorRole),
 	)
 
 	usersApi.PATCH(
 		"/address/active",
-		userRouter.userHandler.AssignActiveAddressUser,
+		userRouter.handler.AssignActiveAddressUser,
 	)
 
 	usersApi.POST(
 		"/address",
-		userRouter.userHandler.CreateUserAddress,
+		userRouter.handler.CreateUserAddress,
 	)
 
 	usersApi.GET(
 		"/addresses",
-		userRouter.userHandler.GetUserAddresses,
+		userRouter.handler.GetUserAddresses,
 	)
 }

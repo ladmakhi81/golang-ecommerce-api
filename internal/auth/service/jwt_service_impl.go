@@ -11,7 +11,7 @@ type JwtService struct {
 	config config.MainConfig
 }
 
-func NewJwtService(config config.MainConfig) JwtService {
+func NewJwtService(config config.MainConfig) IJwtService {
 	return JwtService{
 		config,
 	}

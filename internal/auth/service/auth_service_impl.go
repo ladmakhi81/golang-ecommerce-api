@@ -23,7 +23,7 @@ func NewAuthService(
 	jwtService IJwtService,
 	translation translations.ITranslation,
 	eventsContainer *events.EventsContainer,
-) AuthService {
+) IAuthService {
 	return AuthService{
 		userService:     userService,
 		jwtService:      jwtService,

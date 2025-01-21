@@ -13,7 +13,7 @@ type UserAddressRepository struct {
 
 func NewUserAddressRepository(
 	storage *storage.Storage,
-) UserAddressRepository {
+) IUserAddressRepository {
 	return UserAddressRepository{
 		storage: storage,
 	}

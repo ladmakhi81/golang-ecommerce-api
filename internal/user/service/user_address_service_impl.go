@@ -20,7 +20,7 @@ func NewUserAddressService(
 	userAddressRepo userrepository.IUserAddressRepository,
 	userService IUserService,
 	translation translations.ITranslation,
-) UserAddressService {
+) IUserAddressService {
 	return UserAddressService{
 		userAddressRepo: userAddressRepo,
 		userService:     userService,
