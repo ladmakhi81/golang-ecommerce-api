@@ -12,6 +12,7 @@ import (
 	paymententity "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/entity"
 	paymentrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/repository"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 	pkgzarinpalservice "github.com/ladmakhi81/golang-ecommerce-api/pkg/zarinpal/service"
 )
 
@@ -20,6 +21,7 @@ type PaymentService struct {
 	zarinpalService    pkgzarinpalservice.IZarinpalService
 	transactionService transactionservice.ITransactionService
 	eventsContainer    *events.EventsContainer
+	translation        translations.ITranslation
 }
 
 func NewPaymentService(
@@ -27,12 +29,14 @@ func NewPaymentService(
 	zarinpalService pkgzarinpalservice.IZarinpalService,
 	transactionService transactionservice.ITransactionService,
 	eventsContainer *events.EventsContainer,
+	translation translations.ITranslation,
 ) PaymentService {
 	return PaymentService{
 		paymentRepo:        paymentRepo,
 		zarinpalService:    zarinpalService,
 		transactionService: transactionService,
 		eventsContainer:    eventsContainer,
+		translation:        translation,
 	}
 }
 
@@ -73,14 +77,20 @@ func (paymentService PaymentService) VerifyPayment(customerId uint, reqBody paym
 		)
 	}
 	if payment == nil {
-		return types.NewClientError("payment not found by this authority", http.StatusNotFound)
+		return types.NewClientError(
+			paymentService.translation.Message("payment.not_found_authority"),
+			http.StatusNotFound,
+		)
 	}
 	if payment.Status != paymententity.PaymentStatusPending {
-		return types.NewClientError("payment is verified before", http.StatusBadRequest)
+		return types.NewClientError(
+			paymentService.translation.Message("payment.verified_before"),
+			http.StatusBadRequest,
+		)
 	}
 	if payment.Customer.ID != customerId {
 		return types.NewClientError(
-			"only the owner of this payment can verified",
+			paymentService.translation.Message("payment.owner_verified_err"),
 			http.StatusForbidden,
 		)
 	}

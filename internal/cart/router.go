@@ -5,6 +5,7 @@ import (
 	cartservice "github.com/ladmakhi81/golang-ecommerce-api/internal/cart/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type CartRouter struct {
@@ -12,17 +13,19 @@ type CartRouter struct {
 	cartHandler CartHandler
 	config      config.MainConfig
 	cartService cartservice.ICartService
+	translation translations.ITranslation
 }
 
 func NewCartRouter(
 	apiRouter *echo.Group,
 	config config.MainConfig,
 	cartService cartservice.ICartService,
+	translation translations.ITranslation,
 ) CartRouter {
 	return CartRouter{
 		apiRouter:   apiRouter,
 		config:      config,
-		cartHandler: NewCartHandler(cartService),
+		cartHandler: NewCartHandler(cartService, translation),
 	}
 }
 

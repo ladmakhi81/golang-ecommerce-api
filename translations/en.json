@@ -40,6 +40,30 @@
         "verify_product_body_email": "Product {{.Name}} with id {{.ID}} verified at {{.Date}}",
         "product_not_found_id": "Product not found with this id",
         "owner_delete_error": "Only creator of product can delete it",
-        "owner_upload_image_error": "Only the owner of product can upload images"
+        "owner_upload_image_error": "Only the owner of product can upload images",
+        "price_item_not_found_id": "Price item is not found",
+        "price_item_owner_add": "Only vendor of this product can add price"
+    },
+    "cart": {
+        "invalid_id": "Provided cart id has wrong format",
+        "duplicate_cart": "This cart created before",
+        "owner_cart_update_err": "The owner of cart can update",
+        "owner_cart_delete_err": "The owner of cart can delete",
+        "not_found_id": "Cart not found with this id"
+    },
+    "order": {
+        "invalid_id": "Provided order id has wrong format",
+        "invalid_order_status_err": "Status must be between Pending | Payed | Preparation | Delivery | Done",
+        "customer_not_provided_address_err": "Customer don't have any address",
+        "provided_carts_not_found": "Carts is not found",
+        "owner_cart_purchased": "Only the owner of the cart can buy this cart",
+        "not_found_id": "Order not found with provided id",
+        "order_status_update_subject_email": "Order Status Updated !!!",
+        "order_status_update_body_email": "Your order with id {{.ID}} updated to {{.Status}} at {{.Date}}"
+    },
+    "payment": {
+        "not_found_authority": "Payment not found by this authority",
+        "verified_before": "Payment is verified before",
+        "owner_verified_err": "Only the owner of this payment can verified"
     }
 }

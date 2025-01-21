@@ -9,6 +9,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 	productservice "github.com/ladmakhi81/golang-ecommerce-api/internal/product/service"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type CartService struct {
@@ -16,6 +17,7 @@ type CartService struct {
 	productService      productservice.IProductService
 	productPriceService productservice.IProductPriceService
 	userService         userservice.IUserService
+	translation         translations.ITranslation
 }
 
 func NewCartService(
@@ -23,12 +25,14 @@ func NewCartService(
 	productService productservice.IProductService,
 	productPriceService productservice.IProductPriceService,
 	userService userservice.IUserService,
+	translation translations.ITranslation,
 ) CartService {
 	return CartService{
 		cartRepo:            cartRepo,
 		productService:      productService,
 		productPriceService: productPriceService,
 		userService:         userService,
+		translation:         translation,
 	}
 }
 
@@ -42,14 +46,20 @@ func (cartService CartService) AddProductToCart(customerID uint, reqBody cartdto
 		return nil, priceItemErr
 	}
 	if priceItem == nil {
-		return nil, types.NewClientError("price item not found", http.StatusNotFound)
+		return nil, types.NewClientError(
+			cartService.translation.Message("product.price_item_not_found_id"),
+			http.StatusNotFound,
+		)
 	}
 	duplicatedCart, duplicatedCartErr := cartService.FindCustomerCartByProductIdAndPriceId(customerID, reqBody.ProductID, reqBody.PriceItemID)
 	if duplicatedCartErr != nil {
 		return nil, duplicatedCartErr
 	}
 	if duplicatedCart != nil {
-		return nil, types.NewClientError("this cart created before", http.StatusConflict)
+		return nil, types.NewClientError(
+			cartService.translation.Message("cart.duplicate_cart"),
+			http.StatusConflict,
+		)
 	}
 	customer, customerErr := cartService.userService.FindBasicUserInfoById(customerID)
 	if customerErr != nil {
@@ -83,7 +93,7 @@ func (cartService CartService) UpdateCartQuantityById(customerID, cartId uint, r
 	}
 	if cart.Customer.ID != customerID {
 		return types.NewClientError(
-			"the owner of cart can update",
+			cartService.translation.Message("cart.owner_cart_update_err"),
 			http.StatusForbidden,
 		)
 	}
@@ -108,7 +118,7 @@ func (cartService CartService) FindCartById(cartId uint) (*cartentity.Cart, erro
 	}
 	if cart == nil {
 		return nil, types.NewClientError(
-			"cart not found",
+			cartService.translation.Message("cart.not_found_id"),
 			http.StatusNotFound,
 		)
 	}
@@ -121,7 +131,7 @@ func (cartService CartService) DeleteCartById(customerID, cartId uint) error {
 	}
 	if cart.Customer.ID != customerID {
 		return types.NewClientError(
-			"the owner of cart can delete",
+			cartService.translation.Message("cart.owner_cart_delete_err"),
 			http.StatusForbidden,
 		)
 	}

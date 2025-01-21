@@ -9,26 +9,33 @@ import (
 	responsehandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/response_handling"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type CartHandler struct {
 	cartService cartservice.ICartService
 	util        utils.Util
+	translation translations.ITranslation
 }
 
 func NewCartHandler(
 	cartService cartservice.ICartService,
+	translation translations.ITranslation,
 ) CartHandler {
 	return CartHandler{
 		cartService: cartService,
 		util:        utils.NewUtil(),
+		translation: translation,
 	}
 }
 
 func (cartHandler CartHandler) AddProductToCart(c echo.Context) error {
 	var reqBody cartdto.AddProductCartReqBody
 	if err := c.Bind(&reqBody); err != nil {
-		return types.NewClientError("invalid request body", http.StatusBadRequest)
+		return types.NewClientError(
+			cartHandler.translation.Message("errors.invalid_request_body"),
+			http.StatusBadRequest,
+		)
 	}
 	if err := c.Validate(reqBody); err != nil {
 		return err
@@ -48,7 +55,7 @@ func (cartHandler CartHandler) AddProductToCart(c echo.Context) error {
 func (cartHandler CartHandler) DeleteUserCart(c echo.Context) error {
 	cartId, parseCartIdErr := cartHandler.util.NumericParamConvertor(
 		c.Param("cartId"),
-		"invalid cart id",
+		cartHandler.translation.Message("cart.invalid_id"),
 	)
 	if parseCartIdErr != nil {
 		return parseCartIdErr
@@ -68,14 +75,17 @@ func (cartHandler CartHandler) DeleteUserCart(c echo.Context) error {
 func (cartHandler CartHandler) UpdateCartQuantity(c echo.Context) error {
 	cartId, parseCartErr := cartHandler.util.NumericParamConvertor(
 		c.Param("cartId"),
-		"invalid cart id",
+		cartHandler.translation.Message("cart.invalid_id"),
 	)
 	if parseCartErr != nil {
 		return parseCartErr
 	}
 	var reqBody cartdto.UpdateCartQuantityReqBody
 	if err := c.Bind(&reqBody); err != nil {
-		return types.NewClientError("invalid request body", http.StatusBadRequest)
+		return types.NewClientError(
+			cartHandler.translation.Message("errors.invalid_request_body"),
+			http.StatusBadRequest,
+		)
 	}
 	if err := c.Validate(reqBody); err != nil {
 		return err

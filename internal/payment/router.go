@@ -6,6 +6,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	paymentservice "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/service"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type PaymentRouter struct {
@@ -13,17 +14,19 @@ type PaymentRouter struct {
 	paymentHandler PaymentHandler
 	config         config.MainConfig
 	paymentService paymentservice.IPaymentService
+	translation    translations.ITranslation
 }
 
 func NewPaymentRouter(
 	apiRouter *echo.Group,
 	config config.MainConfig,
 	paymentService paymentservice.IPaymentService,
+	translation translations.ITranslation,
 ) PaymentRouter {
 	return PaymentRouter{
 		apiRouter:      apiRouter,
 		config:         config,
-		paymentHandler: NewPaymentHandler(paymentService),
+		paymentHandler: NewPaymentHandler(paymentService, translation),
 	}
 }
 

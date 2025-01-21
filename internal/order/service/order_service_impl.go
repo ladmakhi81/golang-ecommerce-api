@@ -1,7 +1,6 @@
 package orderservice
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -15,6 +14,7 @@ import (
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
 	pkgemaildto "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/dto"
 	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type OrderService struct {
@@ -25,6 +25,7 @@ type OrderService struct {
 	paymentService     paymentservice.IPaymentService
 	emailService       pkgemail.IEmailService
 	userAddressService userservice.IUserAddressService
+	translation        translations.ITranslation
 }
 
 func NewOrderService(
@@ -35,6 +36,7 @@ func NewOrderService(
 	paymentService paymentservice.IPaymentService,
 	emailService pkgemail.IEmailService,
 	userAddressService userservice.IUserAddressService,
+	translation translations.ITranslation,
 ) OrderService {
 	return OrderService{
 		userService:        userService,
@@ -44,6 +46,7 @@ func NewOrderService(
 		paymentService:     paymentService,
 		emailService:       emailService,
 		userAddressService: userAddressService,
+		translation:        translation,
 	}
 }
 
@@ -54,18 +57,27 @@ func (orderService OrderService) SubmitOrder(customerId uint, reqBody orderdto.C
 	}
 	// user don't have any address
 	if customer.ActiveAddress.ID == 0 && reqBody.AddressId == 0 {
-		return nil, types.NewClientError("user don't have any address", http.StatusBadRequest)
+		return nil, types.NewClientError(
+			orderService.translation.Message("order.customer_not_provided_address_err"),
+			http.StatusBadRequest,
+		)
 	}
 	carts, cartsErr := orderService.cartService.FindCartsByIds(reqBody.CartIds)
 	if cartsErr != nil {
 		return nil, cartsErr
 	}
 	if len(carts) != len(reqBody.CartIds) {
-		return nil, types.NewClientError("carts is not found", http.StatusNotFound)
+		return nil, types.NewClientError(
+			orderService.translation.Message("order.provided_carts_not_found"),
+			http.StatusNotFound,
+		)
 	}
 	for _, cart := range carts {
 		if cart.Customer.ID != customerId {
-			return nil, types.NewClientError("only the owner of the cart can buy this cart", http.StatusForbidden)
+			return nil, types.NewClientError(
+				orderService.translation.Message("order.owner_cart_purchased"),
+				http.StatusForbidden,
+			)
 		}
 	}
 	finalPrice := orderService.cartService.CalculateFinalPriceOfCarts(carts)
@@ -141,7 +153,10 @@ func (orderService OrderService) FindOrderById(id uint) (*orderentity.Order, err
 		)
 	}
 	if order == nil {
-		return nil, types.NewClientError("order not found", http.StatusNotFound)
+		return nil, types.NewClientError(
+			orderService.translation.Message("order.not_found_id"),
+			http.StatusNotFound,
+		)
 	}
 	return order, nil
 }
@@ -162,11 +177,14 @@ func (orderService OrderService) ChangeOrderStatus(orderId uint, reqBody orderdt
 	orderService.emailService.SendEmail(
 		pkgemaildto.NewSendEmailDto(
 			order.Customer.Email,
-			"Order Updated",
-			fmt.Sprintf("Your Order With ID %d Updated To %s In %s",
-				order.ID,
-				order.Status,
-				order.StatusChangedAt.Format("2006-01-02 15:04:05"),
+			orderService.translation.Message("order.order_status_update_subject_email"),
+			orderService.translation.MessageWithArgs(
+				"order.order_status_update_body_email",
+				map[string]any{
+					"ID":     order.ID,
+					"Status": order.Status,
+					"Date":   order.StatusChangedAt.Format("2006-01-02 15:04:05"),
+				},
 			),
 		),
 	)

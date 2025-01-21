@@ -6,6 +6,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	orderservice "github.com/ladmakhi81/golang-ecommerce-api/internal/order/service"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type OrderRouter struct {
@@ -13,16 +14,18 @@ type OrderRouter struct {
 	orderHandler OrderHandler
 	config       config.MainConfig
 	orderService orderservice.IOrderService
+	translation  translations.ITranslation
 }
 
 func NewOrderRouter(
 	apiRouter *echo.Group,
 	config config.MainConfig,
 	orderService orderservice.IOrderService,
+	translation translations.ITranslation,
 ) OrderRouter {
 	return OrderRouter{
 		apiRouter:    apiRouter,
-		orderHandler: NewOrderHandler(orderService),
+		orderHandler: NewOrderHandler(orderService, translation),
 		config:       config,
 	}
 }

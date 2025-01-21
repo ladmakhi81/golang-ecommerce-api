@@ -95,11 +95,11 @@ func main() {
 	categoryService := categoryservice.NewCategoryService(categoryRepo, mainConfig, translation)
 	transactionService := transactionservice.NewTransactionService(transactionRepo)
 	productService := productservice.NewProductService(userService, categoryService, productRepo, emailService, translation)
-	productPriceService := productservice.NewProductPriceService(productService, productPriceRepo)
-	cartService := cartservice.NewCartService(cartRepo, productService, productPriceService, userService)
-	paymentService := paymentservice.NewPaymentService(paymentRepo, zarinpalService, transactionService, &eventContainer)
+	productPriceService := productservice.NewProductPriceService(productService, productPriceRepo, translation)
+	cartService := cartservice.NewCartService(cartRepo, productService, productPriceService, userService, translation)
+	paymentService := paymentservice.NewPaymentService(paymentRepo, zarinpalService, transactionService, &eventContainer, translation)
 	userAddressService := userservice.NewUserAddressService(userAddressRepo, userService, translation)
-	orderService := orderservice.NewOrderService(userService, orderRepo, cartService, productService, paymentService, emailService, userAddressService)
+	orderService := orderservice.NewOrderService(userService, orderRepo, cartService, productService, paymentService, emailService, userAddressService, translation)
 	vendorIncomeService := vendorincomeservice.NewVendorIncomeService(vendorIncomeRepo, orderService, transactionService)
 
 	// event subscribers
@@ -125,13 +125,13 @@ func main() {
 	productRouter := product.NewProductRouter(apiRoute, mainConfig, productService, productPriceService, translation)
 	productRouter.SetupRouter()
 
-	cartRouter := cart.NewCartRouter(apiRoute, mainConfig, cartService)
+	cartRouter := cart.NewCartRouter(apiRoute, mainConfig, cartService, translation)
 	cartRouter.Setup()
 
-	orderRouter := order.NewOrderRouter(apiRoute, mainConfig, orderService)
+	orderRouter := order.NewOrderRouter(apiRoute, mainConfig, orderService, translation)
 	orderRouter.SetupRouter()
 
-	paymentRouter := payment.NewPaymentRouter(apiRoute, mainConfig, paymentService)
+	paymentRouter := payment.NewPaymentRouter(apiRoute, mainConfig, paymentService, translation)
 	paymentRouter.SetupRouter()
 
 	transactionRouter := transaction.NewTransactionRouter(apiRoute, mainConfig, transactionService)

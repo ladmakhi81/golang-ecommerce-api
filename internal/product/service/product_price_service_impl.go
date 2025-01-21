@@ -7,20 +7,24 @@ import (
 	productdto "github.com/ladmakhi81/golang-ecommerce-api/internal/product/dto"
 	productentity "github.com/ladmakhi81/golang-ecommerce-api/internal/product/entity"
 	productrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/product/repository"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type ProductPriceService struct {
 	productService   ProductService
 	productPriceRepo productrepository.IProductPriceRepository
+	translation      translations.ITranslation
 }
 
 func NewProductPriceService(
 	productService ProductService,
 	productPriceRepo productrepository.IProductPriceRepository,
+	translation translations.ITranslation,
 ) ProductPriceService {
 	return ProductPriceService{
 		productService:   productService,
 		productPriceRepo: productPriceRepo,
+		translation:      translation,
 	}
 }
 
@@ -30,7 +34,10 @@ func (productPriceService ProductPriceService) AddPriceToProductsPriceList(reqBo
 		return nil, productErr
 	}
 	if product.Vendor.ID != assignerId {
-		return nil, types.NewClientError("only vendor or creator of this product can add price", http.StatusForbidden)
+		return nil, types.NewClientError(
+			productPriceService.translation.Message("product.price_item_owner_add"),
+			http.StatusForbidden,
+		)
 	}
 	priceItem := productentity.NewProductPrice(reqBody.Key, reqBody.Value, reqBody.ExtraPrice, product.ID)
 	if createErr := productPriceService.productPriceRepo.CreateProductPrice(priceItem); createErr != nil {
@@ -48,7 +55,10 @@ func (productPriceService ProductPriceService) RemovePriceItemFromProductList(pr
 		return existenceErr
 	}
 	if !isExist {
-		return types.NewClientError("price item is not found", http.StatusNotFound)
+		return types.NewClientError(
+			productPriceService.translation.Message("product.price_item_not_found_id"),
+			http.StatusNotFound,
+		)
 	}
 	deleteErr := productPriceService.productPriceRepo.DeleteProductPriceById(priceItem)
 	if deleteErr != nil {
@@ -81,7 +91,10 @@ func (productPriceService ProductPriceService) FindPriceItemById(priceItemID uin
 		)
 	}
 	if priceItem == nil {
-		return nil, types.NewClientError("price item not found", http.StatusNotFound)
+		return nil, types.NewClientError(
+			productPriceService.translation.Message("product.price_item_not_found_id"),
+			http.StatusNotFound,
+		)
 	}
 	return priceItem, nil
 }
