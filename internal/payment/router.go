@@ -4,34 +4,31 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
-	paymentservice "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/service"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
-	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type PaymentRouter struct {
-	apiRouter      *echo.Group
-	paymentHandler PaymentHandler
-	config         config.MainConfig
-	paymentService paymentservice.IPaymentService
-	translation    translations.ITranslation
+	baseApi *echo.Group
+	handler PaymentHandler
+	config  config.MainConfig
 }
 
 func NewPaymentRouter(
-	apiRouter *echo.Group,
 	config config.MainConfig,
-	paymentService paymentservice.IPaymentService,
-	translation translations.ITranslation,
+	handler PaymentHandler,
 ) PaymentRouter {
 	return PaymentRouter{
-		apiRouter:      apiRouter,
-		config:         config,
-		paymentHandler: NewPaymentHandler(paymentService, translation),
+		config:  config,
+		handler: handler,
 	}
 }
 
-func (paymentRouter PaymentRouter) SetupRouter() {
-	paymentsApi := paymentRouter.apiRouter.Group("/payments")
+func (paymentRouter *PaymentRouter) SetBaseApi(baseApi *echo.Group) {
+	paymentRouter.baseApi = baseApi
+}
+
+func (paymentRouter PaymentRouter) RegisterRoutes() {
+	paymentsApi := paymentRouter.baseApi.Group("/payments")
 
 	paymentsApi.Use(
 		middlewares.AuthMiddleware(paymentRouter.config.SecretKey),
@@ -39,11 +36,11 @@ func (paymentRouter PaymentRouter) SetupRouter() {
 
 	paymentsApi.POST(
 		"/verify",
-		paymentRouter.paymentHandler.VerifyPayment,
+		paymentRouter.handler.VerifyPayment,
 	)
 	paymentsApi.GET(
 		"/page",
-		paymentRouter.paymentHandler.GetPaymentsPage,
+		paymentRouter.handler.GetPaymentsPage,
 		middlewares.RoleMiddleware(userentity.AdminRole),
 	)
 }

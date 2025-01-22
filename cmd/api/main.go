@@ -15,14 +15,12 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/validation"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/events"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/order"
-	paymentrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/repository"
-	paymentservice "github.com/ladmakhi81/golang-ecommerce-api/internal/payment/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/payment"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/product"
 	transactionrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/repository"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/user"
 	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
-	pkgzarinpalservice "github.com/ladmakhi81/golang-ecommerce-api/pkg/zarinpal/service"
 	"go.uber.org/dig"
 )
 
@@ -176,9 +174,6 @@ func main() {
 	diContainer.Provide(func() config.MainConfig {
 		return mainConfig
 	})
-	diContainer.Provide(paymentservice.NewPaymentService)
-	diContainer.Provide(paymentrepository.NewPaymentRepository)
-	diContainer.Provide(pkgzarinpalservice.NewZarinpalService)
 	diContainer.Provide(transactionservice.NewTransactionService)
 	diContainer.Provide(transactionrepository.NewTransactionRepository)
 
@@ -200,12 +195,16 @@ func main() {
 	orderModule := order.NewOrderModule(diContainer, apiRoute)
 	orderModule.LoadModule()
 
+	paymentModule := payment.NewPaymentModule(diContainer, apiRoute)
+	paymentModule.LoadModule()
+
 	authModule.Run()
 	userModule.Run()
 	productModule.Run()
 	categoryModule.Run()
 	cartModule.Run()
 	orderModule.Run()
+	paymentModule.Run()
 
 	appServer.StartApp()
 }
