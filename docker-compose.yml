@@ -8,3 +8,14 @@ services:
       - POSTGRES_USER=postgres
     ports:
       - 5432:5432
+  app:
+    container_name: app
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8081:8081
+    depends_on:
+      - db
+    restart: on-failure
+    entrypoint: ["sh", "-c", "make run-migrations && ./server"]
