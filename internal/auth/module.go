@@ -39,6 +39,6 @@ func (authModule AuthModule) Run() {
 	if err == nil {
 		fmt.Println("AuthModule Loaded Successfully")
 	} else {
-		fmt.Println("AuthModule Not Loaded")
+		fmt.Println("AuthModule Not Loaded", err)
 	}
 }
