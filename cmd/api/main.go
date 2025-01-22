@@ -17,6 +17,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/order"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/payment"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/product"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/transaction"
 	transactionrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/repository"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/user"
@@ -198,6 +199,9 @@ func main() {
 	paymentModule := payment.NewPaymentModule(diContainer, apiRoute)
 	paymentModule.LoadModule()
 
+	transactionModule := transaction.NewTransactionModule(diContainer, apiRoute)
+	transactionModule.LoadModule()
+
 	authModule.Run()
 	userModule.Run()
 	productModule.Run()
@@ -205,6 +209,7 @@ func main() {
 	cartModule.Run()
 	orderModule.Run()
 	paymentModule.Run()
+	transactionModule.Run()
 
 	appServer.StartApp()
 }

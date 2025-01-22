@@ -4,31 +4,31 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
-	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
 type TransactionRouter struct {
-	apiRoute           *echo.Group
-	config             config.MainConfig
-	transactionHandler TransactionHandler
-	transactionService transactionservice.ITransactionService
+	baseApi *echo.Group
+	config  config.MainConfig
+	handler TransactionHandler
 }
 
 func NewTransactionRouter(
-	apiRoute *echo.Group,
 	config config.MainConfig,
-	transactionService transactionservice.ITransactionService,
+	handler TransactionHandler,
 ) TransactionRouter {
 	return TransactionRouter{
-		apiRoute:           apiRoute,
-		config:             config,
-		transactionHandler: NewTransactionHandler(transactionService),
+		config:  config,
+		handler: handler,
 	}
 }
 
-func (transactionRouter TransactionRouter) Setup() {
-	transactionApi := transactionRouter.apiRoute.Group("/transactions")
+func (transactionRouter *TransactionRouter) SetBaseApi(baseApi *echo.Group) {
+	transactionRouter.baseApi = baseApi
+}
+
+func (transactionRouter TransactionRouter) RegisterRoutes() {
+	transactionApi := transactionRouter.baseApi.Group("/transactions")
 
 	transactionApi.Use(
 		middlewares.AuthMiddleware(
@@ -38,7 +38,7 @@ func (transactionRouter TransactionRouter) Setup() {
 
 	transactionApi.GET(
 		"/page",
-		transactionRouter.transactionHandler.GetTransactionsPage,
+		transactionRouter.handler.GetTransactionsPage,
 		middlewares.RoleMiddleware(userentity.AdminRole),
 	)
 }
