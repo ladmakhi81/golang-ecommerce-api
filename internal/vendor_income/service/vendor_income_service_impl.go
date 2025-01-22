@@ -19,7 +19,7 @@ func NewVendorIncomeService(
 	vendorIncomeRepo vendorincomerepository.IVendorIncomeRepository,
 	orderService orderservice.IOrderService,
 	transactionService transactionservice.ITransactionService,
-) VendorIncomeService {
+) IVendorIncomeService {
 	return VendorIncomeService{
 		vendorIncomeRepo:   vendorIncomeRepo,
 		orderService:       orderService,

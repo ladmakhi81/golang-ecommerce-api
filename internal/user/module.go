@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
+	userevent "github.com/ladmakhi81/golang-ecommerce-api/internal/user/event"
 	userrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/user/repository"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
 	"go.uber.org/dig"
@@ -31,6 +32,8 @@ func (userModule UserModule) LoadModule() {
 	userModule.diContainer.Provide(userrepository.NewUserAddressRepository)
 	userModule.diContainer.Provide(NewUserRouter)
 	userModule.diContainer.Provide(NewUserHandler)
+	userModule.diContainer.Provide(userevent.NewUserEventsSubscriber)
+	userModule.diContainer.Provide(userevent.NewUserEventsContainer)
 }
 
 func (userModule UserModule) Run() {
@@ -39,9 +42,13 @@ func (userModule UserModule) Run() {
 		userRouter.RegisterRoutes()
 	})
 
-	if err == nil {
+	userEventsErr := userModule.diContainer.Invoke(func(userEventsContainer userevent.UserEventsContainer) {
+		userEventsContainer.RegisterEvents()
+	})
+
+	if err == nil && userEventsErr == nil {
 		fmt.Println("UserModule Loaded Successfully")
 	} else {
-		fmt.Println("UserModule Not Loaded", err)
+		fmt.Println("UserModule Not Loaded")
 	}
 }

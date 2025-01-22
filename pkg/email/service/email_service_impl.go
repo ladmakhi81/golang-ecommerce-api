@@ -12,7 +12,7 @@ type EmailService struct {
 	config config.MainConfig
 }
 
-func NewEmailService(config config.MainConfig) EmailService {
+func NewEmailService(config config.MainConfig) IEmailService {
 	return EmailService{config}
 }
 

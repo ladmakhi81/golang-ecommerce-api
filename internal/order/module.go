@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
+	orderevent "github.com/ladmakhi81/golang-ecommerce-api/internal/order/event"
 	orderrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/order/repository"
 	orderservice "github.com/ladmakhi81/golang-ecommerce-api/internal/order/service"
 	"go.uber.org/dig"
@@ -29,6 +30,8 @@ func (orderModule OrderModule) LoadModule() {
 	orderModule.diContainer.Provide(NewOrderHandler)
 	orderModule.diContainer.Provide(orderservice.NewOrderService)
 	orderModule.diContainer.Provide(orderrepository.NewOrderRepository)
+	orderModule.diContainer.Provide(orderevent.NewOrderEventsSubscriber)
+	orderModule.diContainer.Provide(orderevent.NewOrderEventsContainer)
 }
 
 func (orderModule OrderModule) Run() {
@@ -37,9 +40,13 @@ func (orderModule OrderModule) Run() {
 		orderRouter.RegisterRoutes()
 	})
 
-	if err == nil {
+	orderEventErr := orderModule.diContainer.Invoke(func(orderEventsContainer orderevent.OrderEventsContainer) {
+		orderEventsContainer.RegisterEvents()
+	})
+
+	if err == nil && orderEventErr == nil {
 		fmt.Println("OrderModule Loaded Successfully")
 	} else {
-		fmt.Println("OrderModule Not Load", err)
+		fmt.Println("OrderModule Not Load")
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
+	productevent "github.com/ladmakhi81/golang-ecommerce-api/internal/product/event"
 	productrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/product/repository"
 	productservice "github.com/ladmakhi81/golang-ecommerce-api/internal/product/service"
 	"go.uber.org/dig"
@@ -31,6 +32,8 @@ func (productModule ProductModule) LoadModule() {
 	productModule.diContainer.Provide(productrepository.NewProductRepository)
 	productModule.diContainer.Provide(NewProductHandler)
 	productModule.diContainer.Provide(NewProductRouter)
+	productModule.diContainer.Provide(productevent.NewProductEventsSubscriber)
+	productModule.diContainer.Provide(productevent.NewProductEventsContainer)
 }
 
 func (productModule ProductModule) Run() {
@@ -38,9 +41,12 @@ func (productModule ProductModule) Run() {
 		productRouter.SetBaseApi(productModule.baseApi)
 		productRouter.RegisterRoutes()
 	})
-	if err == nil {
+	productEventErr := productModule.diContainer.Invoke(func(productEventsContainer productevent.ProductEventsContainer) {
+		productEventsContainer.RegisterEvents()
+	})
+	if err == nil && productEventErr == nil {
 		fmt.Println("ProductModule Loaded Successfully")
 	} else {
-		fmt.Println("ProductModule Not Loaded", err)
+		fmt.Println("ProductModule Not Loaded")
 	}
 }

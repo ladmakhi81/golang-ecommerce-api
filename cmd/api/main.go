@@ -21,6 +21,8 @@ import (
 	transactionrepository "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/repository"
 	transactionservice "github.com/ladmakhi81/golang-ecommerce-api/internal/transaction/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/user"
+	vendorincome "github.com/ladmakhi81/golang-ecommerce-api/internal/vendor_income"
+	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
 	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 	"go.uber.org/dig"
 )
@@ -169,8 +171,9 @@ func main() {
 	apiRoute := appServer.GetApiPath()
 
 	diContainer.Provide(translations.NewTranslation)
-	diContainer.Provide(events.NewEventsContainer2)
+	diContainer.Provide(events.NewEventsContainer)
 	diContainer.Provide(storage.NewStorage)
+	diContainer.Provide(pkgemail.NewEmailService)
 	diContainer.Provide(utils.NewUtil)
 	diContainer.Provide(func() config.MainConfig {
 		return mainConfig
@@ -202,6 +205,9 @@ func main() {
 	transactionModule := transaction.NewTransactionModule(diContainer, apiRoute)
 	transactionModule.LoadModule()
 
+	vendorIncomeModule := vendorincome.NewVendorIncomeModule(diContainer, apiRoute)
+	vendorIncomeModule.LoadModule()
+
 	authModule.Run()
 	userModule.Run()
 	productModule.Run()
@@ -210,6 +216,7 @@ func main() {
 	orderModule.Run()
 	paymentModule.Run()
 	transactionModule.Run()
+	vendorIncomeModule.Run()
 
 	appServer.StartApp()
 }
@@ -245,16 +252,3 @@ func (appServer *AppServer) StartApp() {
 func (appServer AppServer) GetApiPath() *echo.Group {
 	return appServer.app.Group("/api/v1")
 }
-
-// func diUser(container *dig.Container) {
-// 	container.Provide(userservice.NewUserService)
-// 	container.Provide(userservice.NewUserAddressService)
-// 	container.Provide(userrepository.NewUserRepository)
-// 	container.Provide(userrepository.NewUserAddressRepository)
-// }
-
-// func diAuth(container *dig.Container) {
-// 	container.Provide(auth.NewAuthHandler)
-// 	container.Provide(authservice.NewAuthService)
-// 	container.Provide(authservice.NewJwtService)
-// }

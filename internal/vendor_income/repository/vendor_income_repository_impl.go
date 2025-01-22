@@ -11,7 +11,7 @@ type VendorIncomeRepository struct {
 
 func NewVendorIncomeRepository(
 	storage *storage.Storage,
-) VendorIncomeRepository {
+) IVendorIncomeRepository {
 	return VendorIncomeRepository{
 		storage: storage,
 	}
