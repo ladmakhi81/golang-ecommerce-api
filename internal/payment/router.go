@@ -2,24 +2,23 @@ package payment
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
 type PaymentRouter struct {
-	baseApi *echo.Group
-	handler PaymentHandler
-	config  config.MainConfig
+	baseApi    *echo.Group
+	handler    PaymentHandler
+	middleware middlewares.Middleware
 }
 
 func NewPaymentRouter(
-	config config.MainConfig,
 	handler PaymentHandler,
+	middleware middlewares.Middleware,
 ) PaymentRouter {
 	return PaymentRouter{
-		config:  config,
-		handler: handler,
+		handler:    handler,
+		middleware: middleware,
 	}
 }
 
@@ -31,7 +30,7 @@ func (paymentRouter PaymentRouter) RegisterRoutes() {
 	paymentsApi := paymentRouter.baseApi.Group("/payments")
 
 	paymentsApi.Use(
-		middlewares.AuthMiddleware(paymentRouter.config.SecretKey),
+		paymentRouter.middleware.AuthMiddleware(),
 	)
 
 	paymentsApi.POST(
@@ -41,6 +40,6 @@ func (paymentRouter PaymentRouter) RegisterRoutes() {
 	paymentsApi.GET(
 		"/page",
 		paymentRouter.handler.GetPaymentsPage,
-		middlewares.RoleMiddleware(userentity.AdminRole),
+		paymentRouter.middleware.RoleMiddleware(userentity.AdminRole),
 	)
 }

@@ -2,23 +2,22 @@ package cart
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 )
 
 type CartRouter struct {
-	baseApi *echo.Group
-	handler CartHandler
-	config  config.MainConfig
+	baseApi    *echo.Group
+	handler    CartHandler
+	middleware middlewares.Middleware
 }
 
 func NewCartRouter(
 	handler CartHandler,
-	config config.MainConfig,
+	middleware middlewares.Middleware,
 ) CartRouter {
 	return CartRouter{
-		config:  config,
-		handler: handler,
+		handler:    handler,
+		middleware: middleware,
 	}
 }
 
@@ -30,9 +29,7 @@ func (cartRouter CartRouter) RegisterRoutes() {
 	cartApi := cartRouter.baseApi.Group("/cart")
 
 	cartApi.Use(
-		middlewares.AuthMiddleware(
-			cartRouter.config.SecretKey,
-		),
+		cartRouter.middleware.AuthMiddleware(),
 	)
 	cartApi.POST("", cartRouter.handler.AddProductToCart)
 	cartApi.DELETE("/:cartId", cartRouter.handler.DeleteUserCart)

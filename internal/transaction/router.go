@@ -2,24 +2,23 @@ package transaction
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
 type TransactionRouter struct {
-	baseApi *echo.Group
-	config  config.MainConfig
-	handler TransactionHandler
+	baseApi    *echo.Group
+	handler    TransactionHandler
+	middleware middlewares.Middleware
 }
 
 func NewTransactionRouter(
-	config config.MainConfig,
 	handler TransactionHandler,
+	middleware middlewares.Middleware,
 ) TransactionRouter {
 	return TransactionRouter{
-		config:  config,
-		handler: handler,
+		handler:    handler,
+		middleware: middleware,
 	}
 }
 
@@ -31,14 +30,12 @@ func (transactionRouter TransactionRouter) RegisterRoutes() {
 	transactionApi := transactionRouter.baseApi.Group("/transactions")
 
 	transactionApi.Use(
-		middlewares.AuthMiddleware(
-			transactionRouter.config.SecretKey,
-		),
+		transactionRouter.middleware.AuthMiddleware(),
 	)
 
 	transactionApi.GET(
 		"/page",
 		transactionRouter.handler.GetTransactionsPage,
-		middlewares.RoleMiddleware(userentity.AdminRole),
+		transactionRouter.middleware.RoleMiddleware(userentity.AdminRole),
 	)
 }

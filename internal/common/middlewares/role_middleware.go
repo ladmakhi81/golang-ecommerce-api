@@ -8,7 +8,7 @@ import (
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
-func RoleMiddleware(allowedRole userentity.UserRole) echo.MiddlewareFunc {
+func (middleware Middleware) RoleMiddleware(allowedRole userentity.UserRole) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			userRole := c.Get("AuthClaim").(*types.AuthClaim).Role

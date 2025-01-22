@@ -2,24 +2,23 @@ package user
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
 type UserRouter struct {
-	handler UserHandler
-	baseApi *echo.Group
-	config  config.MainConfig
+	handler    UserHandler
+	baseApi    *echo.Group
+	middleware middlewares.Middleware
 }
 
 func NewUserRouter(
 	userHandler UserHandler,
-	config config.MainConfig,
+	middleware middlewares.Middleware,
 ) UserRouter {
 	return UserRouter{
-		handler: userHandler,
-		config:  config,
+		handler:    userHandler,
+		middleware: middleware,
 	}
 }
 
@@ -31,21 +30,19 @@ func (userRouter UserRouter) RegisterRoutes() {
 	usersApi := userRouter.baseApi.Group("/users")
 
 	usersApi.Use(
-		middlewares.AuthMiddleware(
-			userRouter.config.SecretKey,
-		),
+		userRouter.middleware.AuthMiddleware(),
 	)
 
 	usersApi.PATCH(
 		"/verify-account/:id",
 		userRouter.handler.VerifyAccountByAdmin,
-		middlewares.RoleMiddleware(userentity.AdminRole),
+		userRouter.middleware.RoleMiddleware(userentity.AdminRole),
 	)
 
 	usersApi.PATCH(
 		"/complete-profile",
 		userRouter.handler.CompleteProfile,
-		middlewares.RoleMiddleware(userentity.VendorRole),
+		userRouter.middleware.RoleMiddleware(userentity.VendorRole),
 	)
 
 	usersApi.PATCH(

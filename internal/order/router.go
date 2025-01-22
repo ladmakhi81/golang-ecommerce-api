@@ -2,24 +2,23 @@ package order
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
 type OrderRouter struct {
-	baseApi *echo.Group
-	handler OrderHandler
-	config  config.MainConfig
+	baseApi    *echo.Group
+	handler    OrderHandler
+	middleware middlewares.Middleware
 }
 
 func NewOrderRouter(
 	handler OrderHandler,
-	config config.MainConfig,
+	middleware middlewares.Middleware,
 ) OrderRouter {
 	return OrderRouter{
-		handler: handler,
-		config:  config,
+		handler:    handler,
+		middleware: middleware,
 	}
 }
 
@@ -31,7 +30,7 @@ func (orderRouter OrderRouter) RegisterRoutes() {
 	orderApi := orderRouter.baseApi.Group("/orders")
 
 	orderApi.Use(
-		middlewares.AuthMiddleware(orderRouter.config.SecretKey),
+		orderRouter.middleware.AuthMiddleware(),
 	)
 
 	orderApi.POST(
@@ -42,12 +41,12 @@ func (orderRouter OrderRouter) RegisterRoutes() {
 	orderApi.PATCH(
 		"/:orderId",
 		orderRouter.handler.UpdateOrderStatus,
-		middlewares.RoleMiddleware(userentity.AdminRole),
+		orderRouter.middleware.RoleMiddleware(userentity.AdminRole),
 	)
 
 	orderApi.GET(
 		"/page",
 		orderRouter.handler.FindOrdersPage,
-		middlewares.RoleMiddleware(userentity.AdminRole),
+		orderRouter.middleware.RoleMiddleware(userentity.AdminRole),
 	)
 }

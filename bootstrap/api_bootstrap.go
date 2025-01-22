@@ -11,6 +11,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/category"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	errorhandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/error_handling"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/storage"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/validation"
@@ -103,6 +104,7 @@ func (appServer AppServer) loadBasicDependency() {
 	appServer.container.Provide(translations.NewTranslation)
 	appServer.container.Provide(events.NewEventsContainer)
 	appServer.container.Provide(storage.NewStorage)
+	appServer.container.Provide(middlewares.NewMiddleware)
 	appServer.container.Provide(pkgemail.NewEmailService)
 	appServer.container.Provide(utils.NewUtil)
 	appServer.container.Provide(func() config.MainConfig {

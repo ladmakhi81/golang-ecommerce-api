@@ -9,9 +9,9 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/types"
 )
 
-func AuthMiddleware(secretKey string) echo.MiddlewareFunc {
+func (middleware Middleware) AuthMiddleware() echo.MiddlewareFunc {
 	return echojwt.WithConfig(echojwt.Config{
-		SigningKey:    []byte(secretKey),
+		SigningKey:    []byte(middleware.config.SecretKey),
 		SigningMethod: jwt.SigningMethodHS256.Name,
 		ContextKey:    "Auth",
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {

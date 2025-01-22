@@ -2,24 +2,23 @@ package category
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
 type CategoryRouter struct {
-	baseApi *echo.Group
-	handler CategoryHandler
-	config  config.MainConfig
+	baseApi    *echo.Group
+	handler    CategoryHandler
+	middleware middlewares.Middleware
 }
 
 func NewCategoryRouter(
 	handler CategoryHandler,
-	config config.MainConfig,
+	middleware middlewares.Middleware,
 ) CategoryRouter {
 	return CategoryRouter{
-		handler: handler,
-		config:  config,
+		handler:    handler,
+		middleware: middleware,
 	}
 }
 
@@ -31,15 +30,13 @@ func (categoryRouter CategoryRouter) RegisterRoutes() {
 	categoriesApi := categoryRouter.baseApi.Group("/categories")
 
 	categoriesApi.Use(
-		middlewares.AuthMiddleware(
-			categoryRouter.config.SecretKey,
-		),
+		categoryRouter.middleware.AuthMiddleware(),
 	)
 
 	categoriesApi.POST(
 		"",
 		categoryRouter.handler.CreateCategory,
-		middlewares.RoleMiddleware(userentity.VendorRole),
+		categoryRouter.middleware.RoleMiddleware(userentity.VendorRole),
 	)
 	categoriesApi.GET(
 		"",
@@ -52,11 +49,11 @@ func (categoryRouter CategoryRouter) RegisterRoutes() {
 	categoriesApi.DELETE(
 		"/:id",
 		categoryRouter.handler.DeleteCategoryById,
-		middlewares.RoleMiddleware(userentity.VendorRole),
+		categoryRouter.middleware.RoleMiddleware(userentity.VendorRole),
 	)
 	categoriesApi.PATCH(
 		"/icon/:categoryId",
 		categoryRouter.handler.UploadCategoryIcon,
-		middlewares.RoleMiddleware(userentity.VendorRole),
+		categoryRouter.middleware.RoleMiddleware(userentity.VendorRole),
 	)
 }

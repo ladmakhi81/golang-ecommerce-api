@@ -2,28 +2,27 @@ package product
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/utils"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 )
 
 type ProductRouter struct {
-	baseApi *echo.Group
-	handler ProductHandler
-	util    utils.Util
-	config  config.MainConfig
+	baseApi    *echo.Group
+	handler    ProductHandler
+	util       utils.Util
+	middleware middlewares.Middleware
 }
 
 func NewProductRouter(
-	config config.MainConfig,
 	handler ProductHandler,
 	util utils.Util,
+	middleware middlewares.Middleware,
 ) ProductRouter {
 	return ProductRouter{
-		handler: handler,
-		util:    util,
-		config:  config,
+		handler:    handler,
+		util:       util,
+		middleware: middleware,
 	}
 }
 
@@ -35,19 +34,17 @@ func (productRouter ProductRouter) RegisterRoutes() {
 	productsApi := productRouter.baseApi.Group("/products")
 
 	productsApi.Use(
-		middlewares.AuthMiddleware(
-			productRouter.config.SecretKey,
-		),
+		productRouter.middleware.AuthMiddleware(),
 	)
 	productsApi.POST(
 		"",
 		productRouter.handler.CreateProduct,
-		middlewares.RoleMiddleware(userentity.VendorRole),
+		productRouter.middleware.RoleMiddleware(userentity.VendorRole),
 	)
 	productsApi.PATCH(
 		"/:id",
 		productRouter.handler.ConfirmProductByAdmin,
-		middlewares.RoleMiddleware(userentity.AdminRole),
+		productRouter.middleware.RoleMiddleware(userentity.AdminRole),
 	)
 	productsApi.GET(
 		"/prices/:productId",
@@ -64,21 +61,21 @@ func (productRouter ProductRouter) RegisterRoutes() {
 	productsApi.DELETE(
 		"/:id",
 		productRouter.handler.DeleteProductById,
-		middlewares.RoleMiddleware(userentity.VendorRole),
+		productRouter.middleware.RoleMiddleware(userentity.VendorRole),
 	)
 	productsApi.POST(
 		"/price/:product_id",
 		productRouter.handler.AddPriceToProductPriceList,
-		middlewares.RoleMiddleware(userentity.VendorRole),
+		productRouter.middleware.RoleMiddleware(userentity.VendorRole),
 	)
 	productsApi.DELETE(
 		"/price/:id",
 		productRouter.handler.DeletePriceItem,
-		middlewares.RoleMiddleware(userentity.VendorRole),
+		productRouter.middleware.RoleMiddleware(userentity.VendorRole),
 	)
 	productsApi.PATCH(
 		"/images/:id",
 		productRouter.handler.UploadProductImages,
-		middlewares.RoleMiddleware(userentity.VendorRole),
+		productRouter.middleware.RoleMiddleware(userentity.VendorRole),
 	)
 }
