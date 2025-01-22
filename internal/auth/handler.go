@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -30,7 +29,6 @@ func NewAuthHandler(
 func (handler AuthHandler) Signup(c echo.Context) error {
 	var reqBody authdto.SignupReqBody
 	if err := c.Bind(&reqBody); err != nil {
-		fmt.Println("error")
 		return types.NewClientError(
 			handler.translation.Message("errors.invalid_request_body"),
 			http.StatusBadRequest,

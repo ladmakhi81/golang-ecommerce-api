@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/labstack/echo/v4"
@@ -21,6 +22,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/user"
 	vendorincome "github.com/ladmakhi81/golang-ecommerce-api/internal/vendor_income"
 	pkgemail "github.com/ladmakhi81/golang-ecommerce-api/pkg/email/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/logger"
 	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 	"go.uber.org/dig"
 )
@@ -41,18 +43,39 @@ type AppServer struct {
 	config    config.MainConfig
 	app       *echo.Echo
 	container *dig.Container
+	logger    logger.ILogger
 	AppServerModule
 }
 
-func NewAppServer(config config.MainConfig, container *dig.Container) AppServer {
-	return AppServer{config: config, app: echo.New(), container: container}
+func NewAppServer(
+	config config.MainConfig,
+	container *dig.Container,
+	logger logger.ILogger,
+) AppServer {
+	return AppServer{
+		config:    config,
+		app:       echo.New(),
+		container: container,
+		logger:    logger,
+	}
 }
 
 func (appServer *AppServer) configAppServer() {
 	mainConfig := config.NewMainConfig()
 	mainConfig.LoadConfigs()
 
-	appServer.app.Use(middleware.Logger())
+	appServer.app.Use(
+		middleware.RequestLoggerWithConfig(
+			middleware.RequestLoggerConfig{
+				LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+					appServer.logger.Info(
+						fmt.Sprintf("REQUEST:%s, STATUS:%d", c.Request().URL, c.Response().Status),
+					)
+					return nil
+				},
+			},
+		),
+	)
 	appServer.app.Use(
 		middleware.CORSWithConfig(
 			middleware.CORSConfig{

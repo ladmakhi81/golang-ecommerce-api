@@ -8,6 +8,7 @@ import (
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/events"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
 	userservice "github.com/ladmakhi81/golang-ecommerce-api/internal/user/service"
+	"github.com/ladmakhi81/golang-ecommerce-api/pkg/logger"
 	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
@@ -23,6 +24,7 @@ func NewAuthService(
 	jwtService IJwtService,
 	translation translations.ITranslation,
 	eventsContainer *events.EventsContainer,
+	logger logger.ILogger,
 ) IAuthService {
 	return AuthService{
 		userService:     userService,
