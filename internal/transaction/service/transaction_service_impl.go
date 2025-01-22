@@ -14,7 +14,7 @@ type TransactionService struct {
 
 func NewTransactionService(
 	transactionRepo transactionrepository.ITransactionRepository,
-) TransactionService {
+) ITransactionService {
 	return TransactionService{
 		transactionRepo: transactionRepo,
 	}

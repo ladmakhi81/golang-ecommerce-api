@@ -4,34 +4,31 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/middlewares"
-	orderservice "github.com/ladmakhi81/golang-ecommerce-api/internal/order/service"
 	userentity "github.com/ladmakhi81/golang-ecommerce-api/internal/user/entity"
-	"github.com/ladmakhi81/golang-ecommerce-api/pkg/translations"
 )
 
 type OrderRouter struct {
-	apiRouter    *echo.Group
-	orderHandler OrderHandler
-	config       config.MainConfig
-	orderService orderservice.IOrderService
-	translation  translations.ITranslation
+	baseApi *echo.Group
+	handler OrderHandler
+	config  config.MainConfig
 }
 
 func NewOrderRouter(
-	apiRouter *echo.Group,
+	handler OrderHandler,
 	config config.MainConfig,
-	orderService orderservice.IOrderService,
-	translation translations.ITranslation,
 ) OrderRouter {
 	return OrderRouter{
-		apiRouter:    apiRouter,
-		orderHandler: NewOrderHandler(orderService, translation),
-		config:       config,
+		handler: handler,
+		config:  config,
 	}
 }
 
-func (orderRouter OrderRouter) SetupRouter() {
-	orderApi := orderRouter.apiRouter.Group("/orders")
+func (orderRouter *OrderRouter) SetBaseApi(baseApi *echo.Group) {
+	orderRouter.baseApi = baseApi
+}
+
+func (orderRouter OrderRouter) RegisterRoutes() {
+	orderApi := orderRouter.baseApi.Group("/orders")
 
 	orderApi.Use(
 		middlewares.AuthMiddleware(orderRouter.config.SecretKey),
@@ -39,18 +36,18 @@ func (orderRouter OrderRouter) SetupRouter() {
 
 	orderApi.POST(
 		"",
-		orderRouter.orderHandler.CreateOrder,
+		orderRouter.handler.CreateOrder,
 	)
 
 	orderApi.PATCH(
 		"/:orderId",
-		orderRouter.orderHandler.UpdateOrderStatus,
+		orderRouter.handler.UpdateOrderStatus,
 		middlewares.RoleMiddleware(userentity.AdminRole),
 	)
 
 	orderApi.GET(
 		"/page",
-		orderRouter.orderHandler.FindOrdersPage,
+		orderRouter.handler.FindOrdersPage,
 		middlewares.RoleMiddleware(userentity.AdminRole),
 	)
 }

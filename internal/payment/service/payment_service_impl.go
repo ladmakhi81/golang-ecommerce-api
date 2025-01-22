@@ -30,7 +30,7 @@ func NewPaymentService(
 	transactionService transactionservice.ITransactionService,
 	eventsContainer *events.EventsContainer,
 	translation translations.ITranslation,
-) PaymentService {
+) IPaymentService {
 	return PaymentService{
 		paymentRepo:        paymentRepo,
 		zarinpalService:    zarinpalService,

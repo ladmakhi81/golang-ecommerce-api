@@ -13,7 +13,7 @@ type OrderRepository struct {
 	storage *storage.Storage
 }
 
-func NewOrderRepository(storage *storage.Storage) OrderRepository {
+func NewOrderRepository(storage *storage.Storage) IOrderRepository {
 	return OrderRepository{
 		storage: storage,
 	}

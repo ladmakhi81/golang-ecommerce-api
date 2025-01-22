@@ -16,7 +16,7 @@ type TransactionRepository struct {
 
 func NewTransactionRepository(
 	storage *storage.Storage,
-) TransactionRepository {
+) ITransactionRepository {
 	return TransactionRepository{
 		storage: storage,
 	}

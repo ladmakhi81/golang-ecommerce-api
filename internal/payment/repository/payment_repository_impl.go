@@ -13,7 +13,7 @@ type PaymentRepository struct {
 	storage *storage.Storage
 }
 
-func NewPaymentRepository(storage *storage.Storage) PaymentRepository {
+func NewPaymentRepository(storage *storage.Storage) IPaymentRepository {
 	return PaymentRepository{
 		storage: storage,
 	}

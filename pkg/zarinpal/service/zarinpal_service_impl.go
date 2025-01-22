@@ -16,7 +16,7 @@ type ZarinpalService struct {
 
 func NewZarinpalService(
 	config config.MainConfig,
-) ZarinpalService {
+) IZarinpalService {
 	return ZarinpalService{
 		config: config,
 	}

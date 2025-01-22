@@ -33,7 +33,7 @@ func NewOrderService(
 	paymentService paymentservice.IPaymentService,
 	userAddressService userservice.IUserAddressService,
 	translation translations.ITranslation,
-) OrderService {
+) IOrderService {
 	return OrderService{
 		userService:        userService,
 		orderRepo:          orderRepo,
