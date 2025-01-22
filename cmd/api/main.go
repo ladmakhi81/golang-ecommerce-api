@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/auth"
+	"github.com/ladmakhi81/golang-ecommerce-api/internal/cart"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/category"
 	"github.com/ladmakhi81/golang-ecommerce-api/internal/common/config"
 	errorhandling "github.com/ladmakhi81/golang-ecommerce-api/internal/common/error_handling"
@@ -182,10 +183,15 @@ func main() {
 	userModule := user.NewUserModule(diContainer, apiRoute)
 	userModule.LoadModule()
 
+	cartModule := cart.NewCartModule(diContainer, apiRoute)
+	cartModule.LoadModule()
+
 	authModule.Run()
 	userModule.Run()
 	productModule.Run()
 	categoryModule.Run()
+	cartModule.Run()
+
 	appServer.StartApp()
 }
 

@@ -26,7 +26,7 @@ func NewCartService(
 	productPriceService productservice.IProductPriceService,
 	userService userservice.IUserService,
 	translation translations.ITranslation,
-) CartService {
+) ICartService {
 	return CartService{
 		cartRepo:            cartRepo,
 		productService:      productService,

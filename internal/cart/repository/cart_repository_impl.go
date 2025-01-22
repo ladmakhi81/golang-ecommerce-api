@@ -14,7 +14,7 @@ type CartRepository struct {
 	storage *storage.Storage
 }
 
-func NewCartRepository(storage *storage.Storage) CartRepository {
+func NewCartRepository(storage *storage.Storage) ICartRepository {
 	return CartRepository{
 		storage: storage,
 	}
